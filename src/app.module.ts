@@ -21,8 +21,12 @@ import { UsersModule } from './modules/users/users.module';
 import { AuthModule } from './modules/auth/auth.module';
 import { TokenModule } from './modules/tokens/token.module';
 import { LanguageMiddleware } from './middlewares/language.middleware';
-import { ClientModule } from './modules/client/client.module';
 import { RedisModule } from './modules/redis/redis.module';
+import { AppointmentsModule } from './modules/appointments/appointments.module';
+import { ServicesModule } from './modules/services/services.module';
+import { StylistsModule } from './modules/stylists/stylists.module';
+import { BranchesModule } from './modules/branches/branches.module';
+import { PromotionsModule } from './modules/promotions/promotions.module';
 
 @Module({
   imports: [
@@ -45,8 +49,12 @@ import { RedisModule } from './modules/redis/redis.module';
     UsersModule,
     AuthModule,
     TokenModule,
-    ClientModule,
     RedisModule,
+    AppointmentsModule,
+    ServicesModule,
+    StylistsModule,
+    BranchesModule,
+    PromotionsModule,
   ],
   controllers: [],
   providers: [JwtService],

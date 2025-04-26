@@ -1,7 +1,7 @@
 import { Column, Entity, PrimaryGeneratedColumn } from 'typeorm';
 import { BaseTimestamp } from './base-timestamp';
 
-@Entity('IW_Tokens')
+@Entity('Tokens')
 export class TokensEntity extends BaseTimestamp {
   @PrimaryGeneratedColumn('uuid', { name: 'Id' })
   id: string;
