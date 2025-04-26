@@ -33,21 +33,6 @@ export const MESSAGE = {
   HARD_DELETE_USER_SUCCESS: 'user.hard_delete_success',
   HARD_DELETE_USER_FAIL: 'user.hard_delete_fail',
 
-  //client
-  CREATE_CLIENT_SUCCESS: 'client.create_success',
-  UPDATE_CLIENT_SUCCESS: 'client.update_success',
-  DELETE_CLIENT_SUCCESS: 'client.delete_success',
-  DELETE_CLIENT_FAILED: 'client.delete_failed',
-  CLIENT_NOT_FOUND: 'client.not_found',
-
-  //project
-  CREATE_PROJECT_SUCCESS: 'project.create_success',
-  DELETE_PROJECT_SUCCESS: 'project.delete_success',
-  DELETE_PROJECT_FAILED: 'project.delete_failed',
-  UPDATE_PROJECT_SUCCESS: 'project.update_success',
-  PROJECT_NOT_FOUND: 'project.not_found',
-  FILE_NOT_FOUND: 'project.file_not_found',
-
   //file
   FILES_UPLOADED_SUCCESS: 'file.upload_success',
   FILES_NOT_FOUND: 'file.not_found',
@@ -64,6 +49,19 @@ export const MESSAGE = {
   FEEDBACK_FILE_UPLOADED_FAILED: 'feedback.file_upload_failed',
   FEEDBACK_NOT_FOUND: 'feedback.not_found',
   UPDATE_STATUS_FEEDBACK_SUCCESS: 'feedback.update_status_success',
+
+  //appointment
+  APPOINTMENT_NOT_FOUND: 'appointment.not_found',
+  APPOINTMENT_DATE_IN_PAST: 'appointment.date_in_past',
+  CREATE_APPOINTMENT_SUCCESS: 'appointment.create_success',
+  TIME_SLOT_CONFLICT: 'appointment.time_slot_conflict',
+  //branch
+  BRANCH_NOT_FOUND: 'branch.not_found',
+
+  //stylist
+  STYLIST_NOT_FOUND: 'stylist.not_found',
+  STYLIST_NOT_BELONG_TO_BRANCH: 'stylist.not_belong_to_branch',
+  STYLIST_CREATE_SUCCESS: 'stylist.create_success',
 };
 
 // mail footer

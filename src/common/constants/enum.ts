@@ -4,6 +4,12 @@ export enum Role {
   Barber = 'system_barber',
 }
 
+export enum NotificationType {
+  APPOINTMENT = 'appointment',
+  PROMOTION = 'promotion',
+  SYSTEM = 'system',
+}
+
 export const timeZoneObj = {
   manualTimezone: '',
   automaticTimezone: '',
