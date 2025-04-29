@@ -1,4 +1,4 @@
-import { Exclude, Expose } from 'class-transformer';
+import { Exclude, Expose, Type } from 'class-transformer';
 import { PaginationResponse } from 'src/common/types/pagination';
 
 export class ServicesResponse {
@@ -12,10 +12,14 @@ export class ServicesResponse {
   description: string;
 
   @Expose()
+  @Type(() => Number)
   price: number;
 
   @Expose()
   duration: number;
+
+  @Expose()
+  image: string;
 }
 
 export class Services extends PaginationResponse<ServicesResponse> {}

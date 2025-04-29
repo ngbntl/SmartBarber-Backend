@@ -14,4 +14,9 @@ export default () => ({
     port: parseInt(process.env.MAIL_PORT, 10) || 587,
     sender: process.env.MAIL_SENDER || '',
   },
+  cloudinary: {
+    cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
+    api_key: process.env.CLOUDINARY_API_KEY,
+    api_secret: process.env.CLOUDINARY_API_SECRET,
+  },
 });

@@ -9,7 +9,10 @@ export class AppointmentResponse {
   userId: string;
 
   @Expose()
-  barberId: string;
+  @Transform(({ obj }) =>
+    obj.stylist ? `${obj.stylist.firstName} ${obj.stylist.lastName}` : '',
+  )
+  stylistName: string;
 
   @Expose()
   branchId: string;
