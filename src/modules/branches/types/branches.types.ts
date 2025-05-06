@@ -34,6 +34,12 @@ export class BranchesResponse {
 
   @Expose()
   ratingCount: number;
+
+  @Expose()
+  openTime: string;
+
+  @Expose()
+  closeTime: string;
 }
 
 export class Branches extends PaginationResponse<BranchesResponse> {}

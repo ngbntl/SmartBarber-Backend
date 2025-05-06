@@ -18,6 +18,11 @@ export class CreateServiceDto {
   @IsNumber()
   duration: number;
 
+  @ApiProperty({ description: 'Hình ảnh dịch vụ', required: false })
+  @IsString()
+  @IsOptional()
+  image?: string;
+
   @ApiProperty({ description: 'Trạng thái hoạt động', default: true })
   @IsBoolean()
   @IsOptional()

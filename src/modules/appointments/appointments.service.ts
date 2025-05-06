@@ -4,7 +4,6 @@ import {
   BadRequestException,
   ConflictException,
   HttpStatus,
-  Logger,
 } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Between, Repository } from 'typeorm';
@@ -44,6 +43,10 @@ export class AppointmentsService {
       } = createAppointmentDto;
 
       const service = await this.servicesService.getServiceById(serviceId);
+      const user = await this.stylistService.findOne(userId);
+      if (!user) {
+        throw new NotFoundException(MESSAGE.USER_NOT_FOUND);
+      }
 
       const branch = await this.branchService.findOne(branchId);
 

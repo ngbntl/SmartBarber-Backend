@@ -17,6 +17,9 @@ export class Service {
   @Column()
   duration: number; // Thời gian thực hiện dịch vụ (phút)
 
+  @Column({ nullable: true })
+  image: string;
+
   @Column({ default: true })
   isActive: boolean;
 
