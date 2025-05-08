@@ -13,11 +13,6 @@ import { UsersService } from './users.service';
 import { plainToClass } from 'class-transformer';
 import { UserResponse } from './types/user.types';
 import { JwtAuth } from 'src/common/decorators/jwt-auth.decorator';
-import { UserQuery } from './dto/user.query.dto';
-import { Role } from 'src/common/constants/enum';
-import { Roles } from 'src/common/decorators/roles.decorator';
-// import { CurrentUser } from 'src/common/decorators/current-user.decorator';
-import { JwtPayload } from 'src/common/interfaces/jwt-payload.interface';
 import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
 
 @ApiBearerAuth()

@@ -1,7 +1,7 @@
-export enum Role {
-  User = 'system_user',
-  Admin = 'system_admin',
-  Barber = 'system_barber',
+export enum RoleType {
+  USER = 'system_user',
+  STYLIST = 'system_stylist',
+  ADMIN = 'system_admin',
 }
 
 export enum NotificationType {

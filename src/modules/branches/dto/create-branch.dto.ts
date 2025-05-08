@@ -35,16 +35,6 @@ export class CreateBranchDto {
   @IsOptional()
   phone?: string;
 
-  @ApiProperty({ description: 'Vĩ độ', required: false })
-  @IsNumber()
-  @IsOptional()
-  latitude?: number;
-
-  @ApiProperty({ description: 'Kinh độ', required: false })
-  @IsNumber()
-  @IsOptional()
-  longitude?: number;
-
   @ApiProperty({ description: 'Mô tả', required: false })
   @IsString()
   @IsOptional()

@@ -6,18 +6,24 @@ import {
   JoinTable,
 } from 'typeorm';
 import { Service } from './service.entity';
+import { BaseTimestamp } from './base-timestamp';
 
 @Entity('promotions')
-export class Promotion {
+export class Promotion extends BaseTimestamp {
   @PrimaryGeneratedColumn('uuid')
   id: string;
 
+  // Promotion basic information
   @Column()
   name: string;
 
   @Column({ type: 'text' })
   description: string;
 
+  @Column({ nullable: true })
+  image: string;
+
+  // Discount configuration
   @Column({ type: 'decimal', precision: 10, scale: 2, default: 0 })
   discountAmount: number;
 
@@ -27,15 +33,18 @@ export class Promotion {
   @Column({ default: false })
   isPercentage: boolean;
 
+  // Validity period
   @Column({ type: 'datetime' })
   startDate: Date;
 
   @Column({ type: 'datetime' })
   endDate: Date;
 
+  // Status
   @Column({ default: true })
   isActive: boolean;
 
+  // Usage configuration
   @Column({ nullable: true })
   code: string;
 
@@ -48,6 +57,7 @@ export class Promotion {
   @Column({ type: 'decimal', precision: 10, scale: 2, nullable: true })
   minimumPurchaseAmount: number;
 
+  // Relationships
   @ManyToMany(() => Service)
   @JoinTable({
     name: 'promotion_services',
@@ -55,17 +65,4 @@ export class Promotion {
     inverseJoinColumn: { name: 'serviceId', referencedColumnName: 'id' },
   })
   applicableServices: Service[];
-
-  @Column({ nullable: true })
-  image: string;
-
-  @Column({ type: 'timestamp', default: () => 'CURRENT_TIMESTAMP' })
-  createdAt: Date;
-
-  @Column({
-    type: 'timestamp',
-    default: () => 'CURRENT_TIMESTAMP',
-    onUpdate: 'CURRENT_TIMESTAMP',
-  })
-  updatedAt: Date;
 }

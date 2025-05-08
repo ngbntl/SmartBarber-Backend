@@ -10,7 +10,7 @@ import {
 } from '@nestjs/common';
 import { StylistsService } from './stylists.service';
 import { CreateStylistDto } from './dto/create-stylist.dto';
-import { Stylist } from '../../database/entities/stylist.entity';
+import { UsersEntity } from '../../database/entities/users.entity';
 import {
   ApiTags,
   ApiOperation,
@@ -19,9 +19,9 @@ import {
 } from '@nestjs/swagger';
 import { JwtAuth } from '../../common/decorators/jwt-auth.decorator';
 import { Roles } from '../../common/decorators/roles.decorator';
-import { Role } from '../../common/constants/enum';
 import { MessageResponse } from 'src/common/types/response';
 import { StylistResponse, Stylists } from './types/stylists.type';
+import { RoleType } from 'src/common/constants/enum';
 
 @ApiTags('stylists')
 @ApiBearerAuth()
@@ -31,7 +31,7 @@ export class StylistsController {
 
   @Post()
   @JwtAuth()
-  @Roles(Role.Admin)
+  @Roles(RoleType.ADMIN)
   @ApiOperation({ summary: 'Tạo thợ cắt tóc mới' })
   create(@Body() createStylistDto: CreateStylistDto): Promise<MessageResponse> {
     return this.stylistsService.create(createStylistDto);

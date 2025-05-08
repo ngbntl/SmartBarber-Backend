@@ -21,7 +21,7 @@ import {
 import { Promotion } from '../../database/entities/promotion.entity';
 import { JwtAuth } from '../../common/decorators/jwt-auth.decorator';
 import { Roles } from '../../common/decorators/roles.decorator';
-import { Role } from '../../common/constants/enum';
+import { RoleType } from 'src/common/constants/enum';
 
 @ApiTags('promotions')
 @ApiBearerAuth()
@@ -31,7 +31,7 @@ export class PromotionsController {
 
   @Post()
   @JwtAuth()
-  @Roles(Role.Admin)
+  @Roles(RoleType.ADMIN)
   @ApiOperation({ summary: 'Tạo khuyến mãi mới' })
   @ApiResponse({
     status: 201,

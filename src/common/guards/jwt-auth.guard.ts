@@ -10,6 +10,7 @@ import { Request } from 'express';
 import { MESSAGE } from '../constants/message';
 import { TokenService } from 'src/modules/tokens/token.service';
 import { UsersService } from 'src/modules/users/users.service';
+import { RoleType } from '../constants/enum';
 
 @Injectable()
 export class JwtAuthGuard implements CanActivate {
@@ -46,10 +47,10 @@ export class JwtAuthGuard implements CanActivate {
       );
 
       if (roles) {
-        const userRolesArray = user.roles.split(' ');
+        const userRole = user.roleType;
         const hasRequiredRole = Array.isArray(roles)
-          ? roles.some((role) => userRolesArray.includes(role))
-          : userRolesArray.includes(roles);
+          ? roles.some((role) => userRole === role)
+          : userRole === roles;
 
         if (!hasRequiredRole) {
           throw new ForbiddenException(MESSAGE.FORBIDDEN);
