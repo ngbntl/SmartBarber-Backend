@@ -1,35 +1,34 @@
-import { Column, Entity, PrimaryColumn } from 'typeorm';
+import { Column, Entity, PrimaryColumn, OneToMany } from 'typeorm';
+import { BaseTimestamp } from './base-timestamp';
+import { Appointment } from './appointment.entity';
 
 @Entity('services')
-export class Service {
+export class Service extends BaseTimestamp {
   @PrimaryColumn('varchar', { length: 26 })
   id: string;
 
-  @Column()
+  // Service information
+  @Column({ name: 'Name', length: 100 })
   name: string;
 
-  @Column('text')
+  @Column({ name: 'Description', type: 'text' })
   description: string;
 
-  @Column('decimal', { precision: 10, scale: 2 })
+  @Column({ name: 'Price', type: 'decimal', precision: 10, scale: 2 })
   price: number;
 
-  @Column()
-  duration: number; // Thời gian thực hiện dịch vụ (phút)
+  @Column({ name: 'Duration', comment: 'Thời gian thực hiện dịch vụ (phút)' })
+  duration: number;
 
-  @Column({ nullable: true })
+  // Media
+  @Column({ name: 'Image', nullable: true })
   image: string;
 
-  @Column({ default: true })
+  // Status
+  @Column({ name: 'IsActive', default: true })
   isActive: boolean;
 
-  @Column({ type: 'timestamp', default: () => 'CURRENT_TIMESTAMP' })
-  createdAt: Date;
-
-  @Column({
-    type: 'timestamp',
-    default: () => 'CURRENT_TIMESTAMP',
-    onUpdate: 'CURRENT_TIMESTAMP',
-  })
-  updatedAt: Date;
+  // Relationships
+  @OneToMany(() => Appointment, (appointment) => appointment.service)
+  appointments: Appointment[];
 }

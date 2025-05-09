@@ -71,12 +71,15 @@ export class AppointmentsService {
       }
 
       const [hours, minutes] = startTime.split(':').map(Number);
-      const endHours = Math.floor(hours + service.duration / 60);
-      const endMinutes = minutes + (service.duration % 60);
+      const durationMinutes = service.duration; // Thời lượng dịch vụ
 
-      let endTime = `${endHours.toString().padStart(2, '0')}:${endMinutes
+      // Tính giờ kết thúc dựa trên giờ bắt đầu và thời lượng
+      const endHours = Math.floor(hours + durationMinutes / 60);
+      const endMinutes = minutes + (durationMinutes % 60);
+
+      const endTimeString = `${endHours
         .toString()
-        .padStart(2, '0')}`;
+        .padStart(2, '0')}:${endMinutes.toString().padStart(2, '0')}`;
 
       const year = bookingDate.getFullYear();
       const month = bookingDate.getMonth();
@@ -92,8 +95,8 @@ export class AppointmentsService {
         year,
         month,
         day,
-        parseInt(endTime.split(':')[0]),
-        parseInt(endTime.split(':')[1]),
+        parseInt(endTimeString.split(':')[0]),
+        parseInt(endTimeString.split(':')[1]),
       );
 
       const overlappingAppointments = await this.appointmentRepository.find({
@@ -110,7 +113,9 @@ export class AppointmentsService {
 
       const isTimeSlotConflict = overlappingAppointments.some((app) => {
         const [startHour, startMin] = app.startTime.split(':').map(Number);
-        const [endHour, endMin] = app.endTime.split(':').map(Number);
+        // Tính thời gian kết thúc dựa vào thời gian bắt đầu và thời lượng
+        const endHour = Math.floor(startHour + app.durationMinutes / 60);
+        const endMin = startMin + (app.durationMinutes % 60);
 
         const appStart = new Date(year, month, day, startHour, startMin);
         const appEnd = new Date(year, month, day, endHour, endMin);
@@ -133,7 +138,7 @@ export class AppointmentsService {
         stylistId: stylistId || null,
         appointmentDate: bookingDate,
         startTime,
-        endTime: endTime,
+        durationMinutes: durationMinutes, // Sử dụng durationMinutes thay vì endTime
         status: 'pending',
         totalAmount,
         discountAmount,

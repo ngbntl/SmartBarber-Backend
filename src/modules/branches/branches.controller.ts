@@ -13,9 +13,9 @@ import { CreateBranchDto } from './dto/create-branch.dto';
 import { ApiTags, ApiOperation, ApiBearerAuth } from '@nestjs/swagger';
 import { JwtAuth } from '../../common/decorators/jwt-auth.decorator';
 import { Roles } from '../../common/decorators/roles.decorator';
-import { Role } from '../../common/constants/enum';
 import { MessageResponse } from 'src/common/types/response';
 import { Branches } from './types/branches.types';
+import { RoleType } from 'src/common/constants/enum';
 
 @ApiTags('branches')
 @ApiBearerAuth()
@@ -25,7 +25,7 @@ export class BranchesController {
 
   @Post()
   @JwtAuth()
-  @Roles(Role.Admin)
+  @Roles(RoleType.ADMIN)
   @ApiOperation({ summary: 'Tạo chi nhánh mới' })
   create(@Body() createBranchDto: CreateBranchDto): Promise<MessageResponse> {
     return this.branchesService.create(createBranchDto);

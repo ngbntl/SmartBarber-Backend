@@ -1,26 +1,19 @@
 import { Column, Entity, PrimaryGeneratedColumn } from 'typeorm';
+import { BaseTimestamp } from './base-timestamp';
 
 @Entity('time_slots')
-export class TimeSlot {
-  @PrimaryGeneratedColumn()
-  id: number;
+export class TimeSlot extends BaseTimestamp {
+  @PrimaryGeneratedColumn('uuid')
+  id: string;
 
+  // Time information
   @Column({ type: 'time' })
   startTime: string;
 
   @Column({ type: 'time' })
   endTime: string;
 
+  // Status
   @Column({ default: true })
   isAvailable: boolean;
-
-  @Column({ type: 'timestamp', default: () => 'CURRENT_TIMESTAMP' })
-  createdAt: Date;
-
-  @Column({
-    type: 'timestamp',
-    default: () => 'CURRENT_TIMESTAMP',
-    onUpdate: 'CURRENT_TIMESTAMP',
-  })
-  updatedAt: Date;
 }

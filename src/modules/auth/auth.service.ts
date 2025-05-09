@@ -10,7 +10,11 @@ import { UsersService } from '../users/users.service';
 import { TokenService } from '../tokens/token.service';
 import { MailerService } from 'src/helpers/mailer.helper';
 import { ConfigService } from '@nestjs/config';
-import { Role, notifyPropsObj, timeZoneObj } from 'src/common/constants/enum';
+import {
+  notifyPropsObj,
+  timeZoneObj,
+  RoleType,
+} from 'src/common/constants/enum';
 import {
   CONFIRM_REGISTER,
   RESET_PASSWORD,
@@ -109,8 +113,7 @@ export class AuthService {
         nickname: '',
         firstName: request.firstName,
         lastName: request.lastName,
-        roles: Role.User,
-        allowMarketing: 0,
+        roleType: RoleType.USER, // Sử dụng roleType thay vì roles
         props: {},
         notifyProps: notifyPropsObj,
         lastPasswordUpdate: new Date().getTime(),

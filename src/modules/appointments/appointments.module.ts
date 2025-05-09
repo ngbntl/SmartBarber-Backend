@@ -5,14 +5,14 @@ import { AppointmentsService } from './appointments.service';
 import { Appointment } from '../../database/entities/appointment.entity';
 import { TimeSlot } from '../../database/entities/time-slot.entity';
 import { Branch } from '../../database/entities/branch.entity';
-import { Stylist } from '../../database/entities/stylist.entity';
+import { UsersEntity } from '../../database/entities/users.entity';
 import { ServicesModule } from '../services/services.module';
 import { StylistsService } from '../stylists/stylists.service';
 import { BranchesService } from '../branches/branches.service';
 
 @Module({
   imports: [
-    TypeOrmModule.forFeature([Appointment, TimeSlot, Branch, Stylist]),
+    TypeOrmModule.forFeature([Appointment, TimeSlot, Branch, UsersEntity]),
     ServicesModule,
   ],
   controllers: [AppointmentsController],

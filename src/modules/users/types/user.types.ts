@@ -26,7 +26,7 @@ export class UserResponse {
   email: string;
 
   @Expose()
-  roles: string;
+  roleType: string;
 
   @Expose()
   @Transform(({ obj }) => new Date(parseInt(obj.createAt, 10)))

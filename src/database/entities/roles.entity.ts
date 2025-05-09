@@ -1,12 +1,14 @@
 import { Exclude } from 'class-transformer';
-import { Entity, PrimaryColumn, Column, Unique } from 'typeorm';
+import { Entity, PrimaryColumn, Column } from 'typeorm';
+import { BaseTimestamp } from './base-timestamp';
 
 @Exclude()
 @Entity('Roles')
-export class RolesEntity {
+export class RolesEntity extends BaseTimestamp {
   @PrimaryColumn('varchar', { name: 'Id', length: 26 })
   id: string;
 
+  // Role information
   @Column('varchar', { name: 'Name', length: 64, nullable: true })
   name: string;
 
@@ -16,18 +18,11 @@ export class RolesEntity {
   @Column('text', { name: 'Description', nullable: true })
   description: string;
 
-  @Column('bigint', { name: 'CreateAt', nullable: true })
-  createAt: number;
-
-  @Column('bigint', { name: 'UpdateAt', nullable: true })
-  updateAt: number;
-
-  @Column('bigint', { name: 'DeleteAt', nullable: true })
-  deleteAt: number;
-
+  // Permissions and configuration
   @Column('longtext', { name: 'Permissions', nullable: true })
   permissions: string;
 
+  // Role type
   @Column('tinyint', { name: 'SchemeManaged', nullable: true })
   schemeManaged: number;
 
