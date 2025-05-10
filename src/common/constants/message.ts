@@ -191,45 +191,11 @@ export const RESET_PASSWORD = (
   return { titles: titles[language] || '', content: content[language] || '' };
 };
 
-export const SHARE_FILE = (
-  language: string,
-  fullName: string,
-  confirm_url: string,
-) => {
-  const titles: Record<string, string> = {
-    vi: 'Một người đã chia sẻ file cho bạn',
-    en: 'Someone has shared the file with you',
-    ja: '',
-  };
-  const content: Record<string, string> = {
-    vi: `
-      Xin chào <br><br>
-      <strong>${fullName}</strong> đã chia sẻ cho bạn một file
-      Để nhận quyền truy cập, vui lòng nhấn vào liên kết dưới đây:<br>
-      <a href="${confirm_url}" target="_blank">Nhận quyền truy cập</a><br><br>
-      Sau khi nhấn vào liên kết, bạn sẽ có thể bắt đầu sử dụng InWEB ngay lập tức.<br><br>
-      ${MAIL_FOOTER(language)}
-    `,
-    en: `
-      Hello <br><br>
-      <strong>${fullName}</strong> has shared a file with you. 
-      To gain access, please click the link below:<br>
-      <a href="${confirm_url}" target="_blank">Claim Access</a><br><br>
-      Once you click the link, you will be able to start using InWEB immediately.<br><br>
-      ${MAIL_FOOTER(language)}
-    `,
-    ja: '',
-  };
-
-  return { titles: titles[language] || '', content: content[language] || '' };
-};
-
 export const CONFIRM_REGISTER_BY_ADMIN = (
   language: string,
   fullName: string,
   email: string,
   password: string,
-  login_url: string,
 ) => {
   const titles: Record<string, string> = {
     vi: 'Thông báo tài khoản',
@@ -238,37 +204,34 @@ export const CONFIRM_REGISTER_BY_ADMIN = (
   };
   const content: Record<string, string> = {
     vi: `
-      Chào mừng <strong>${fullName},</strong> đến với <strong>InWEB - Giải pháp toàn diện cho thiết kế CAD trên web.</strong><br><br>
+      Chào mừng <strong>${fullName},</strong> đến với <strong>SmartBarber </strong><br><br>
       Chúng tôi đã tạo tài khoản cho bạn với các thông tin đăng nhập dưới đây:
       <ul>
         <li><strong>Tài khoản:</strong> ${email}</li>
         <li><strong>Mật khẩu:</strong> ${password}</li>
       </ul>
       Bạn có thể sử dụng tài khoản này để đăng nhập vào hệ thống.<br><br>
-      <a href="${login_url}" target="_blank">Đăng nhập vào hệ thống</a><br><br>
       ${MAIL_FOOTER(language)}
     `,
     en: `
       Hello <strong>${fullName}</strong>,<br><br> 
-      Welcome to <strong>InWEB - a comprehensive solution for CAD design on the web</strong>.<br><br> 
+      Welcome to <strong>SmartBarber</strong>.<br><br> 
       We have created an account for you. Please find your login details below:<br>
       <ul>
         <li><strong>Account:</strong> ${email}</li>
         <li><strong>Password:</strong> ${password}</li>
       </ul>
       You can use this account to log into the system.<br><br> 
-      <a href="${login_url}" target="_blank">Log into the system</a><br><br>
       ${MAIL_FOOTER(language)}
     `,
     ja: `
     こんにちは <strong>${fullName}</strong> 様、
-    <strong>InWEB - Web上でのCAD設計のための包括的ソリューション</strong> へようこそ。<br><br>
+    <strong>SmartBarber<br><br>
     お客様のためにアカウントを作成いたしました。以下のログイン情報をご確認ください：
     <ul> 
       <li><strong>アカウント：</strong> ${email}</li> 
       <li><strong>パスワード：</strong> ${password}</li> 
     </ul> このアカウントを使用してシステムにログインできます。<br><br> 
-    <a href="${login_url}" target="_blank">システムにログイン</a><br><br>
     ${MAIL_FOOTER(language)}
   `,
   };

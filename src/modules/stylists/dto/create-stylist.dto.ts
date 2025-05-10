@@ -17,15 +17,9 @@ export class CreateStylistDto {
   @IsString()
   lastName: string;
 
-  @ApiProperty({ description: 'Đường dẫn ảnh đại diện', required: false })
+  @ApiProperty({ description: 'Email' })
   @IsString()
-  @IsOptional()
-  avatar?: string;
-
-  @ApiProperty({ description: 'Thông tin giới thiệu', required: false })
-  @IsString()
-  @IsOptional()
-  bio?: string;
+  email: string;
 
   @ApiProperty({ description: 'Chuyên môn', required: false })
   @IsString()
