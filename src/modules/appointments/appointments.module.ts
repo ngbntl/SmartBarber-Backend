@@ -7,16 +7,18 @@ import { TimeSlot } from '../../database/entities/time-slot.entity';
 import { Branch } from '../../database/entities/branch.entity';
 import { UsersEntity } from '../../database/entities/users.entity';
 import { ServicesModule } from '../services/services.module';
-import { StylistsService } from '../stylists/stylists.service';
-import { BranchesService } from '../branches/branches.service';
+import { StylistsModule } from '../stylists/stylists.module';
+import { BranchesModule } from '../branches/branches.module';
 
 @Module({
   imports: [
     TypeOrmModule.forFeature([Appointment, TimeSlot, Branch, UsersEntity]),
     ServicesModule,
+    StylistsModule,
+    BranchesModule,
   ],
   controllers: [AppointmentsController],
-  providers: [AppointmentsService, StylistsService, BranchesService],
+  providers: [AppointmentsService],
   exports: [AppointmentsService],
 })
 export class AppointmentsModule {}

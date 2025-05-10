@@ -113,7 +113,7 @@ export class AuthService {
         nickname: '',
         firstName: request.firstName,
         lastName: request.lastName,
-        roleType: RoleType.USER, // Sử dụng roleType thay vì roles
+        roleType: RoleType.USER,
         props: {},
         notifyProps: notifyPropsObj,
         lastPasswordUpdate: new Date().getTime(),
