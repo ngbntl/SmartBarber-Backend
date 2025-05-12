@@ -118,9 +118,7 @@ export class ServicesService {
       const items = plainToInstance(ServicesResponse, services, {
         excludeExtraneousValues: true,
       });
-      items.forEach((item) => {
-        Logger.log(typeof item.price);
-      });
+
       return { items, total };
     } catch (error) {
       console.error('Error fetching services:', error);
