@@ -11,12 +11,7 @@ import {
 import { StylistsService } from './stylists.service';
 import { CreateStylistDto } from './dto/create-stylist.dto';
 import { UsersEntity } from '../../database/entities/users.entity';
-import {
-  ApiTags,
-  ApiOperation,
-  ApiResponse,
-  ApiBearerAuth,
-} from '@nestjs/swagger';
+import { ApiTags, ApiOperation, ApiBearerAuth } from '@nestjs/swagger';
 import { JwtAuth } from '../../common/decorators/jwt-auth.decorator';
 import { Roles } from '../../common/decorators/roles.decorator';
 import { MessageResponse } from 'src/common/types/response';
@@ -47,5 +42,17 @@ export class StylistsController {
   @ApiOperation({ summary: 'Lấy thông tin chi tiết thợ cắt tóc' })
   findOne(@Param('id') id: string): Promise<StylistResponse> {
     return this.stylistsService.findOne(id);
+  }
+
+  @Get('branch/:branchId')
+  @ApiOperation({ summary: 'Lấy danh sách thợ cắt tóc theo chi nhánh' })
+  findByBranch(@Param('branchId') branchId: string): Promise<Stylists> {
+    return this.stylistsService.findByBranch(branchId);
+  }
+
+  @Get('schedule/:stylistId')
+  @ApiOperation({ summary: 'Lấy lịch làm việc trong 7 ngày của stylist' })
+  getWeeklySchedule(@Param('stylistId') stylistId: string) {
+    return this.stylistsService.getWeeklySchedule(stylistId);
   }
 }

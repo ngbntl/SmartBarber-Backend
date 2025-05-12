@@ -1,4 +1,4 @@
-import { Expose } from 'class-transformer';
+import { Expose, Type } from 'class-transformer';
 import { PaginationResponse } from 'src/common/types/pagination';
 
 export class StylistResponse {
@@ -37,3 +37,25 @@ export class StylistResponse {
 }
 
 export class Stylists extends PaginationResponse<StylistResponse> {}
+
+// Định nghĩa kiểu dữ liệu cho một ngày trong lịch làm việc
+export class DailySchedule {
+  @Expose()
+  date: string; // YYYY-MM-DD
+
+  @Expose()
+  dayOfWeek: string; // Monday, Tuesday, ...
+
+  @Expose()
+  isWorking: boolean;
+}
+
+// Định nghĩa kiểu dữ liệu lịch làm việc trong tuần
+export class WeeklySchedule {
+  @Expose()
+  stylistId: string;
+
+  @Expose()
+  @Type(() => DailySchedule)
+  days: DailySchedule[];
+}

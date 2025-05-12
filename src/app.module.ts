@@ -27,6 +27,7 @@ import { ServicesModule } from './modules/services/services.module';
 import { StylistsModule } from './modules/stylists/stylists.module';
 import { BranchesModule } from './modules/branches/branches.module';
 import { PromotionsModule } from './modules/promotions/promotions.module';
+import { TimeSlotsModule } from './modules/time-slots/time-slots.module';
 
 @Module({
   imports: [
@@ -55,6 +56,7 @@ import { PromotionsModule } from './modules/promotions/promotions.module';
     StylistsModule,
     BranchesModule,
     PromotionsModule,
+    TimeSlotsModule,
   ],
   controllers: [],
   providers: [JwtService],

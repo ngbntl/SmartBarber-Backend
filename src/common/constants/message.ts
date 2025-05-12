@@ -33,14 +33,6 @@ export const MESSAGE = {
   HARD_DELETE_USER_SUCCESS: 'user.hard_delete_success',
   HARD_DELETE_USER_FAIL: 'user.hard_delete_fail',
 
-  //file
-  FILES_UPLOADED_SUCCESS: 'file.upload_success',
-  FILES_NOT_FOUND: 'file.not_found',
-  DELETE_FILE_SUCCESS: 'file.delete_success',
-  DELETE_FILE_FAILED: 'file.delete_failed',
-  DELETE_ALL_FILES_SUCCESS: 'file.delete_success',
-  DOWNLOAD_FILES_FAILED: 'file.download_failed',
-
   //contact
   SEND_CONTACT_SUCCESS: 'contact.send_contact_success',
 
@@ -62,6 +54,7 @@ export const MESSAGE = {
   STYLIST_NOT_FOUND: 'stylist.not_found',
   STYLIST_NOT_BELONG_TO_BRANCH: 'stylist.not_belong_to_branch',
   STYLIST_CREATE_SUCCESS: 'stylist.create_success',
+  STYLIST_BUSY: 'stylist.busy',
 };
 
 // mail footer
