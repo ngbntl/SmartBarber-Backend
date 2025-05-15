@@ -13,6 +13,8 @@ import { UsersEntity } from '../../database/entities/users.entity';
 import { CreatePromotionDto } from './dto/create-promotion.dto';
 import { generateUUID } from 'src/utils/function';
 import { MessageResponse } from 'src/common/types/response';
+import { Promotions, PromotionsResponse } from './types/promotions.type';
+import { plainToInstance } from 'class-transformer';
 
 @Injectable()
 export class PromotionsService {
@@ -98,7 +100,7 @@ export class PromotionsService {
     }
   }
 
-  async findAll(activeOnly: boolean = false): Promise<Promotion[]> {
+  async findAll(activeOnly: boolean = false): Promise<Promotions> {
     try {
       const query: any = {};
 
@@ -109,13 +111,21 @@ export class PromotionsService {
         query.endDate = MoreThanOrEqual(now);
       }
 
-      return await this.promotionRepository.find({
+      const [promotions, total] = await this.promotionRepository.findAndCount({
         where: query,
         relations: ['applicableServices'],
         order: {
           startDate: 'DESC',
         },
       });
+
+      const items = plainToInstance(PromotionsResponse, promotions, {
+        excludeExtraneousValues: true,
+      });
+      return {
+        items,
+        total,
+      };
     } catch (error) {
       throw error;
     }
