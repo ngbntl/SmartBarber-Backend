@@ -11,7 +11,6 @@ import { Appointment } from './appointment.entity';
 import { RoleType } from '../../common/constants/enum';
 import { BaseTimestamp } from './base-timestamp';
 import { Branch } from './branch.entity';
-import { TimeSlot } from './time-slot.entity';
 import { StylistSchedule } from './stylist-schedule.entity';
 import { StylistTimeOff } from './stylist-time-off.entity';
 
@@ -132,9 +131,6 @@ export class UsersEntity extends BaseTimestamp {
 
   @OneToMany(() => Appointment, (appointment) => appointment.stylist)
   stylistAppointments: Appointment[];
-
-  @OneToMany(() => TimeSlot, (timeSlot) => timeSlot.stylist)
-  timeSlots: TimeSlot[];
 
   @OneToMany(() => StylistSchedule, (schedule) => schedule.stylist)
   schedules: StylistSchedule[];

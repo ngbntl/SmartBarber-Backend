@@ -7,10 +7,10 @@ import {
   OneToMany,
 } from 'typeorm';
 import { UsersEntity } from './users.entity';
-import { Service } from './service.entity';
 import { Branch } from './branch.entity';
 import { Review } from './review.entity';
 import { BaseTimestamp } from './base-timestamp';
+import { AppointmentService } from './appointment-service.entity';
 
 @Entity('Appointments')
 export class Appointment extends BaseTimestamp {
@@ -25,13 +25,17 @@ export class Appointment extends BaseTimestamp {
   @JoinColumn({ name: 'UserId' })
   user: UsersEntity;
 
-  // Service relationship
-  @Column('varchar', { name: 'ServiceId', length: 26 })
-  serviceId: string;
-
-  @ManyToOne(() => Service, (service) => service.appointments)
-  @JoinColumn({ name: 'ServiceId' })
-  service: Service;
+  // AppointmentService relationship - replacing direct Service relationship
+  @OneToMany(
+    () => AppointmentService,
+    (appointmentService) => appointmentService.appointment,
+    {
+      cascade: true,
+      // Tắt eager loading để tránh lỗi
+      eager: false,
+    },
+  )
+  appointmentServices: AppointmentService[];
 
   // Stylist relationship
   @Column('varchar', { name: 'StylistId', length: 26, nullable: true })
@@ -42,7 +46,7 @@ export class Appointment extends BaseTimestamp {
   stylist: UsersEntity;
 
   // Branch relationship
-  @Column('varchar', { name: 'BranchId', length: 26 })
+  @Column('varchar', { name: 'BranchId', length: 36 })
   branchId: string;
 
   @ManyToOne(() => Branch)
@@ -56,7 +60,7 @@ export class Appointment extends BaseTimestamp {
   @Column({ name: 'StartTime', type: 'time' })
   startTime: string;
 
-  @Column({ name: 'DurationMinutes', type: 'int' }) // Thay EndTime bằng DurationMinutes
+  @Column({ name: 'DurationMinutes', type: 'int' })
   durationMinutes: number;
 
   // Appointment status

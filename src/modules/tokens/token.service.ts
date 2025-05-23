@@ -81,7 +81,7 @@ export class TokenService {
       accessPublicKey,
       refreshPublicKey,
       expireAt,
-      createAt: new Date().getTime()
+      createAt: new Date().getTime(),
     };
 
     const token = await this.save(dataToken);
@@ -154,7 +154,7 @@ export class TokenService {
         );
       }
 
-      const { refreshToken, refreshPublicKey, userId , updateAt} = tokenDb;
+      const { refreshToken, refreshPublicKey, userId, updatedAt } = tokenDb;
 
       jwt.verify(refreshToken, refreshPublicKey, (err, decode) => {
         if (err) {
@@ -182,7 +182,7 @@ export class TokenService {
       );
 
       tokenDb.accessPublicKey = accessPublicKey;
-      tokenDb.updateAt = new Date().getTime()
+      tokenDb.updatedAt = new Date().getTime();
       await this.save(tokenDb);
 
       return {

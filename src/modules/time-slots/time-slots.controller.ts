@@ -18,4 +18,15 @@ export class TimeSlotsController {
       date,
     );
   }
+
+  @Get('status/stylist/:stylistId')
+  @ApiOperation({
+    summary: 'Lấy trạng thái của tất cả khung giờ trong một ngày',
+  })
+  async getTimeSlotStatusByDate(
+    @Param('stylistId') stylistId: string,
+    @Query('date') date: string,
+  ) {
+    return await this.timeSlotsService.getTimeSlotStatusByDate(stylistId, date);
+  }
 }

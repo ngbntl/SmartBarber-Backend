@@ -55,6 +55,7 @@ export const MESSAGE = {
   STYLIST_NOT_BELONG_TO_BRANCH: 'stylist.not_belong_to_branch',
   STYLIST_CREATE_SUCCESS: 'stylist.create_success',
   STYLIST_BUSY: 'stylist.busy',
+  SCHEDULE_UPDATE_SUCCESS: 'stylist.schedule_update_success',
 };
 
 // mail footer
