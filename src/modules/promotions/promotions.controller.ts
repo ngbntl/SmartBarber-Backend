@@ -22,6 +22,7 @@ import { Promotion } from '../../database/entities/promotion.entity';
 import { JwtAuth } from '../../common/decorators/jwt-auth.decorator';
 import { Roles } from '../../common/decorators/roles.decorator';
 import { RoleType } from 'src/common/constants/enum';
+import { Promotions } from './types/promotions.type';
 
 @ApiTags('promotions')
 @ApiBearerAuth()
@@ -45,7 +46,9 @@ export class PromotionsController {
   @Get()
   @ApiOperation({ summary: 'Lấy danh sách tất cả khuyến mãi' })
   @ApiQuery({ name: 'activeOnly', required: false, type: Boolean })
-  findAll(@Query('activeOnly') activeOnly: boolean = false) {
+  findAll(
+    @Query('activeOnly') activeOnly: boolean = false,
+  ): Promise<Promotions> {
     return this.promotionsService.findAll(activeOnly);
   }
 

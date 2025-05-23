@@ -27,4 +27,13 @@ export class AppointmentsController {
   ): Promise<Appointments> {
     return this.appointmentsService.getAppointmentsByUser(userId);
   }
+
+  @Get('stylist/:stylistId')
+  @JwtAuth()
+  @ApiOperation({ summary: 'Lấy danh sách lịch hẹn của stylist' })
+  getAppointmentsByStylist(
+    @Param('stylistId') stylistId: string,
+  ): Promise<Appointments> {
+    return this.appointmentsService.getAppointmentsByStylist(stylistId);
+  }
 }

@@ -1,15 +1,36 @@
-import { IsString, IsDate, IsOptional, IsNumber } from 'class-validator';
+import {
+  IsString,
+  IsDate,
+  IsOptional,
+  IsNumber,
+  IsArray,
+  ValidateNested,
+  ArrayMinSize,
+  Matches,
+} from 'class-validator';
 import { Type } from 'class-transformer';
 import { ApiProperty } from '@nestjs/swagger';
+
+export class CreateAppointmentServiceDto {
+  @ApiProperty({ description: 'ID dịch vụ' })
+  @IsString()
+  serviceId: string;
+
+  @ApiProperty({ description: 'Ghi chú cho dịch vụ này', required: false })
+  @IsString()
+  @IsOptional()
+  notes?: string;
+}
 
 export class CreateAppointmentDto {
   @ApiProperty({ description: 'ID người dùng' })
   @IsString()
   userId: string;
 
-  @ApiProperty({ description: 'ID dịch vụ' })
-  @IsString()
-  serviceId: string;
+  @ApiProperty({ description: 'Danh sách các ID dịch vụ', type: [String] })
+  @IsArray()
+  @IsString({ each: true })
+  serviceIds: string[];
 
   @ApiProperty({ description: 'ID chi nhánh' })
   @IsString()
@@ -44,7 +65,7 @@ export class CreateAppointmentDto {
   @IsOptional()
   promotionId?: string;
 
-  @ApiProperty({ description: 'Ghi chú', required: false })
+  @ApiProperty({ description: 'Ghi chú chung', required: false })
   @IsString()
   @IsOptional()
   notes?: string;

@@ -102,9 +102,9 @@ export class AuthService {
 
       await this.usersService.save({
         id: userId,
-        createAt: new Date().getTime(),
-        updateAt: new Date().getTime(),
-        deleteAt: 0,
+        createdAt: new Date().getTime(),
+        updatedAt: new Date().getTime(),
+        deletedAt: 0,
         username: email.substring(0, email.indexOf('@')),
         password: hashedPassword,
         authService: '',
@@ -169,7 +169,7 @@ export class AuthService {
       }
 
       user.emailVerified = 1;
-      user.updateAt = new Date().getTime();
+      user.updatedAt = new Date().getTime();
 
       const result = await this.usersService.save(user);
       if (!result) {

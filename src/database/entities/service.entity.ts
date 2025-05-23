@@ -1,6 +1,6 @@
 import { Column, Entity, PrimaryColumn, OneToMany } from 'typeorm';
 import { BaseTimestamp } from './base-timestamp';
-import { Appointment } from './appointment.entity';
+import { AppointmentService } from './appointment-service.entity';
 
 @Entity('services')
 export class Service extends BaseTimestamp {
@@ -29,6 +29,9 @@ export class Service extends BaseTimestamp {
   isActive: boolean;
 
   // Relationships
-  @OneToMany(() => Appointment, (appointment) => appointment.service)
-  appointments: Appointment[];
+  @OneToMany(
+    () => AppointmentService,
+    (appointmentService) => appointmentService.service,
+  )
+  appointmentServices: AppointmentService[];
 }
