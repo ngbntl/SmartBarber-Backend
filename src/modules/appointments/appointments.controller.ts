@@ -5,6 +5,7 @@ import { ApiTags, ApiOperation, ApiBearerAuth } from '@nestjs/swagger';
 
 import { JwtAuth } from '../../common/decorators/jwt-auth.decorator';
 import { Appointments } from './types/appointments.types';
+import { MessageResponse } from 'src/common/types/response';
 
 @ApiBearerAuth()
 @ApiTags('appointments')
@@ -35,5 +36,14 @@ export class AppointmentsController {
     @Param('stylistId') stylistId: string,
   ): Promise<Appointments> {
     return this.appointmentsService.getAppointmentsByStylist(stylistId);
+  }
+
+  @Post('cancel/:appointmentId')
+  @JwtAuth()
+  @ApiOperation({ summary: 'Hủy lịch hẹn' })
+  cancelAppointment(
+    @Param('appointmentId') appointmentId: string,
+  ): Promise<MessageResponse> {
+    return this.appointmentsService.cancelAppointment(appointmentId);
   }
 }

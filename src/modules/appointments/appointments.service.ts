@@ -452,4 +452,27 @@ export class AppointmentsService {
       throw error;
     }
   }
+
+  async cancelAppointment(appointmentId: string): Promise<MessageResponse> {
+    try {
+      const appointment = await this.appointmentRepository.findOne({
+        where: { id: appointmentId },
+      });
+
+      if (!appointment) {
+        throw new NotFoundException(MESSAGE.APPOINTMENT_NOT_FOUND);
+      }
+
+      // Cập nhật trạng thái lịch hẹn thành "cancelled"
+      appointment.status = 'cancelled';
+      await this.appointmentRepository.save(appointment);
+
+      return {
+        statusCode: HttpStatus.OK,
+        message: MESSAGE.APPOINTMENT_CANCEL_SUCCESS,
+      };
+    } catch (error) {
+      throw error;
+    }
+  }
 }
