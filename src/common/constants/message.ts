@@ -47,6 +47,7 @@ export const MESSAGE = {
   APPOINTMENT_DATE_IN_PAST: 'appointment.date_in_past',
   CREATE_APPOINTMENT_SUCCESS: 'appointment.create_success',
   TIME_SLOT_CONFLICT: 'appointment.time_slot_conflict',
+  APPOINTMENT_CANCEL_SUCCESS: 'appointment.cancel_success',
   //branch
   BRANCH_NOT_FOUND: 'branch.not_found',
 
