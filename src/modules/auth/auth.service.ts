@@ -110,7 +110,6 @@ export class AuthService {
         authService: '',
         email,
         emailVerified: 0,
-        nickname: '',
         firstName: request.firstName,
         lastName: request.lastName,
         roleType: RoleType.USER,

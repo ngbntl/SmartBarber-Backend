@@ -26,6 +26,9 @@ export class UserResponse {
   email: string;
 
   @Expose()
+  avatar?: string;
+
+  @Expose()
   roleType: string;
 
   @Expose()
