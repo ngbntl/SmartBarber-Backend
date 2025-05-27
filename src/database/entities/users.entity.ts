@@ -20,30 +20,23 @@ export class UsersEntity extends BaseTimestamp {
   @PrimaryColumn('varchar', { length: 26 })
   id: string;
 
-  // User identity
   @Column('varchar', { name: 'Username', length: 64, nullable: true })
   username: string;
 
   @Column('varchar', { name: 'Password', length: 128, nullable: true })
   password: string;
 
-  // Authentication related fields
   @Column('varchar', { name: 'AuthData', length: 128, nullable: true })
   authData: string;
 
   @Column('varchar', { name: 'AuthService', length: 32, nullable: true })
   authService: string;
 
-  // User contact information
   @Column('varchar', { name: 'Email', length: 128, nullable: true })
   email: string;
 
   @Column('tinyint', { name: 'EmailVerified', nullable: true })
   emailVerified: number;
-
-  // User personal information
-  @Column('varchar', { name: 'Nickname', length: 64, nullable: true })
-  nickname: string;
 
   @Column('varchar', { name: 'FirstName', length: 64, nullable: true })
   firstName: string;
@@ -51,7 +44,6 @@ export class UsersEntity extends BaseTimestamp {
   @Column('varchar', { name: 'LastName', length: 64, nullable: true })
   lastName: string;
 
-  // Permissions and preferences
   @Column({
     name: 'RoleType',
     type: 'enum',
@@ -60,7 +52,6 @@ export class UsersEntity extends BaseTimestamp {
   })
   roleType: RoleType;
 
-  // User settings and configurations
   @Column('json', { name: 'Props', nullable: true })
   props: Record<string, any>;
 
@@ -73,14 +64,12 @@ export class UsersEntity extends BaseTimestamp {
   @Column('json', { name: 'Timezone', nullable: true })
   timezone: Record<string, any>;
 
-  // Security related fields
   @Column('bigint', { name: 'LastPasswordUpdate', nullable: true })
   lastPasswordUpdate: number;
 
   @Column('int', { name: 'FailedAttempts', nullable: true })
   failedAttempts: number;
 
-  // Profile related fields
   @Column('bigint', { name: 'LastPictureUpdate', nullable: true })
   lastPictureUpdate: number;
 
@@ -93,7 +82,6 @@ export class UsersEntity extends BaseTimestamp {
   @Column({ name: 'Avatar', nullable: true })
   avatar: string;
 
-  // Stylist specific fields
   @Column({ name: 'Bio', nullable: true, type: 'text' })
   bio: string;
 
@@ -118,7 +106,6 @@ export class UsersEntity extends BaseTimestamp {
   @Column({ name: 'IsActive', default: false })
   isActive: boolean;
 
-  // Relationships
   @Column({ name: 'BranchId', nullable: true })
   branchId: string;
 
