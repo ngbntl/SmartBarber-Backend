@@ -54,8 +54,19 @@ export class TimeSlotsService {
       }
     }
 
-    const dayOfWeek = getDayOfWeek(requestDate);
+    const today = new Date();
+    if (
+      requestDate.getFullYear() < today.getFullYear() ||
+      (requestDate.getFullYear() === today.getFullYear() &&
+        requestDate.getMonth() < today.getMonth()) ||
+      (requestDate.getFullYear() === today.getFullYear() &&
+        requestDate.getMonth() === today.getMonth() &&
+        requestDate.getDate() < today.getDate())
+    ) {
+      requestDate = today;
+    }
 
+    const dayOfWeek = getDayOfWeek(requestDate);
     const dateString = formatDate(requestDate);
 
     const workingDay = await this.stylistScheduleRepository.findOne({
@@ -113,9 +124,23 @@ export class TimeSlotsService {
         bookingDate: dateString,
       },
     });
-    console.log(bookedSlots);
+
+    const currentHour = today.getHours();
+    const currentMinute = today.getMinutes();
+    const currentTimeString = `${currentHour
+      .toString()
+      .padStart(2, '0')}:${currentMinute.toString().padStart(2, '0')}`;
 
     const availableTimeSlots = timeSlotTemplates.filter((template) => {
+      const isInPast =
+        requestDate.getDate() === today.getDate() &&
+        requestDate.getMonth() === today.getMonth() &&
+        requestDate.getFullYear() === today.getFullYear() &&
+        template.startTime <= currentTimeString;
+
+      // Nếu đã qua giờ này trong ngày hiện tại, bỏ qua
+      if (isInPast) return false;
+
       const isInTimeOff = partialTimeOffs.some((timeOff) => {
         return this.isTimeOverlap(
           template.startTime,
@@ -195,6 +220,20 @@ export class TimeSlotsService {
       throw new BadRequestException('Ngày không hợp lệ');
     }
 
+    // Kiểm tra nếu ngày yêu cầu là trong quá khứ
+    const today = new Date();
+    if (
+      requestDate.getFullYear() < today.getFullYear() ||
+      (requestDate.getFullYear() === today.getFullYear() &&
+        requestDate.getMonth() < today.getMonth()) ||
+      (requestDate.getFullYear() === today.getFullYear() &&
+        requestDate.getMonth() === today.getMonth() &&
+        requestDate.getDate() < today.getDate())
+    ) {
+      // Nếu chọn ngày trong quá khứ, đặt lại thành ngày hiện tại
+      requestDate = today;
+    }
+
     const dateString = formatDate(requestDate);
     const formattedDate = new Date(dateString);
     const dayOfWeek = getDayOfWeek(requestDate);
@@ -216,8 +255,30 @@ export class TimeSlotsService {
       },
     });
 
+    // Lấy giờ hiện tại để lọc các khung giờ đã qua
+    const currentHour = today.getHours();
+    const currentMinute = today.getMinutes();
+    const currentTimeString = `${currentHour
+      .toString()
+      .padStart(2, '0')}:${currentMinute.toString().padStart(2, '0')}`;
+
+    // Lọc khung giờ đã qua nếu là ngày hiện tại
+    const isCurrentDay =
+      requestDate.getDate() === today.getDate() &&
+      requestDate.getMonth() === today.getMonth() &&
+      requestDate.getFullYear() === today.getFullYear();
+
+    // Lọc các khung giờ phù hợp
+    const relevantTimeSlots = timeSlotTemplates.filter((template) => {
+      // Bỏ qua khung giờ đã qua trong ngày hiện tại
+      if (isCurrentDay && template.startTime <= currentTimeString) {
+        return false;
+      }
+      return true;
+    });
+
     if (!workingDay) {
-      const formattedItems = timeSlotTemplates.map((template) => ({
+      const formattedItems = relevantTimeSlots.map((template) => ({
         id: template.id,
         startTime: template.startTime,
         endTime: template.endTime,
@@ -242,7 +303,7 @@ export class TimeSlotsService {
     });
 
     if (timeOffDay) {
-      const formattedItems = timeSlotTemplates.map((template) => ({
+      const formattedItems = relevantTimeSlots.map((template) => ({
         id: template.id,
         startTime: template.startTime,
         endTime: template.endTime,
@@ -274,7 +335,7 @@ export class TimeSlotsService {
       relations: ['appointment'],
     });
 
-    const formattedItems = timeSlotTemplates.map((template) => {
+    const formattedItems = relevantTimeSlots.map((template) => {
       const timeOff = partialTimeOffs.find((off) =>
         this.isTimeOverlap(
           template.startTime,

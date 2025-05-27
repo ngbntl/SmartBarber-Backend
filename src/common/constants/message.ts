@@ -48,6 +48,9 @@ export const MESSAGE = {
   CREATE_APPOINTMENT_SUCCESS: 'appointment.create_success',
   TIME_SLOT_CONFLICT: 'appointment.time_slot_conflict',
   APPOINTMENT_CANCEL_SUCCESS: 'appointment.cancel_success',
+  UNAUTHORIZED_CANCEL_APPOINTMENT: 'appointment.unauthorized_cancel',
+  TOO_LATE_TO_CANCEL: 'appointment.too_late_to_cancel',
+
   //branch
   BRANCH_NOT_FOUND: 'branch.not_found',
 

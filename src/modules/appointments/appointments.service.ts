@@ -453,19 +453,43 @@ export class AppointmentsService {
     }
   }
 
-  async cancelAppointment(appointmentId: string): Promise<MessageResponse> {
+  async cancelAppointment(
+    appointmentId: string,
+    userId?: string,
+  ): Promise<MessageResponse> {
     try {
       const appointment = await this.appointmentRepository.findOne({
         where: { id: appointmentId },
+        relations: ['user', 'branch'],
       });
 
       if (!appointment) {
         throw new NotFoundException(MESSAGE.APPOINTMENT_NOT_FOUND);
       }
 
-      // Cập nhật trạng thái lịch hẹn thành "cancelled"
+      if (userId && userId !== appointment.userId) {
+        throw new BadRequestException(MESSAGE.UNAUTHORIZED_CANCEL_APPOINTMENT);
+      }
+
+      const appointmentDateTime = new Date(appointment.appointmentDate);
+      const [hours, minutes] = appointment.startTime.split(':').map(Number);
+      appointmentDateTime.setHours(hours, minutes);
+
+      const currentTime = new Date();
+      const timeUntilAppointment =
+        appointmentDateTime.getTime() - currentTime.getTime();
+      const hoursUntilAppointment = timeUntilAppointment / (1000 * 60 * 60);
+
+      if (hoursUntilAppointment < 1) {
+        throw new BadRequestException(MESSAGE.TOO_LATE_TO_CANCEL);
+      }
+
       appointment.status = 'cancelled';
       await this.appointmentRepository.save(appointment);
+
+      await this.bookedTimeSlotRepository.delete({
+        appointmentId: appointmentId,
+      });
 
       return {
         statusCode: HttpStatus.OK,
