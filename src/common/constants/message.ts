@@ -60,6 +60,12 @@ export const MESSAGE = {
   STYLIST_CREATE_SUCCESS: 'stylist.create_success',
   STYLIST_BUSY: 'stylist.busy',
   SCHEDULE_UPDATE_SUCCESS: 'stylist.schedule_update_success',
+
+  //google
+  GOOGLE_USER_FAILED: 'google.failed_to_get_google_user',
+  GOOGLE_OAUTH_FAILED: 'google.failed_to_fetch_google_oauth_tokens',
+  GOOGLE_VERIFIED_FAILED: 'google.google_account_not_verified',
+  BAD_REQUEST: 'auth.bad_request',
 };
 
 // mail footer
@@ -142,6 +148,54 @@ export const CONFIRM_REGISTER = (
     `,
   };
 
+  return { titles: titles[language] || '', content: content[language] || '' };
+};
+
+export const CONFIRM_REGISTER_GOOGLE = (
+  language: string,
+  email: string,
+  fullName: string,
+) => {
+  const titles: Record<string, string> = {
+    vi: 'Thông tin tài khoản SmartBarber',
+    en: 'SmartBarber account information',
+    ja: 'SmartBarberアカウント情報',
+  };
+  const content: Record<string, string> = {
+    vi: `
+    Xin chào ${fullName},<br><br>
+    Chào mừng bạn đến với SmartBarber.<br><br>
+    Chúng tôi xin thông báo rằng quá trình đăng ký tài khoản của bạn đã hoàn tất thành công! Bây giờ bạn đã trở thành một phần trong hệ thống của chúng tôi và có thể trải nghiệm toàn bộ các tính năng và dịch vụ làm đẹp mà chúng tôi cung cấp.<br><br>
+    Bạn có thể sử dụng tài khoản của mình để đặt lịch với các stylist chuyên nghiệp, khám phá dịch vụ, và quản lý các cuộc hẹn của bạn.<br><br> 
+    Thông tin chi tiết về tài khoản Google của bạn đã được chúng tôi ghi nhận như sau: <br><br>
+    Email: ${email}<br>
+    Tên: ${fullName}<br><br>
+    Nếu bạn có bất kỳ câu hỏi hoặc cần hỗ trợ nào, đừng ngần ngại liên hệ với chúng tôi bất cứ lúc nào. Chúng tôi luôn sẵn lòng để hỗ trợ bạn.<br><br>
+    ${MAIL_FOOTER(language)}
+    `,
+    en: `
+    Hello ${fullName},<br><br>
+    Welcome to SmartBarber.<br><br>
+    We are pleased to inform you that your account registration process has been successfully completed! You are now part of our system and can experience all the grooming features and services we provide.<br><br>
+    You can use your account to book appointments with professional stylists, explore services, and manage your bookings.<br><br>
+    Details of your Google account have been recorded by us as follows: <br><br>
+    Email: ${email}<br>
+    Name: ${fullName}<br><br>
+    If you have any questions or need any support, please do not hesitate to contact us at any time. We are always ready to assist you.<br><br>
+    ${MAIL_FOOTER(language)}
+    `,
+    ja: `
+    こんにちは ${fullName},<br><br>
+    SmartBarberへようこそ。<br><br>
+    お知らせいたします。アカウント登録プロセスが正常に完了しました！ これで、システムの一部となり、提供しているすべての美容サービスと機能を体験できます。<br><br>
+    あなたのアカウントを使用して、専門のスタイリストとの予約、サービスの閲覧、予約の管理ができます。<br><br>
+    あなたのGoogleアカウントの詳細は次のとおりです： <br><br>
+    Email: ${email}<br>
+    名前: ${fullName}<br><br>
+    ご質問やサポートが必要な場合は、いつでもお問い合わせください。 いつでもお手伝いさせていただきます。<br><br>
+    ${MAIL_FOOTER(language)}
+    `,
+  };
   return { titles: titles[language] || '', content: content[language] || '' };
 };
 

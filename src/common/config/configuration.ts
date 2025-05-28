@@ -19,4 +19,10 @@ export default () => ({
     api_key: process.env.CLOUDINARY_API_KEY,
     api_secret: process.env.CLOUDINARY_API_SECRET,
   },
+  oauth: {
+    google_client_id: process.env.GOOGLE_CLIENT_ID,
+    google_client_secret: process.env.GOOGLE_CLIENT_SECRET,
+    google_url_token: process.env.GOOGLE_URL_TOKEN,
+    google_url_access_token: process.env.GOOGLE_URL_ACCESS_TOKEN,
+  },
 });

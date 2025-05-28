@@ -28,6 +28,7 @@ import { StylistsModule } from './modules/stylists/stylists.module';
 import { BranchesModule } from './modules/branches/branches.module';
 import { PromotionsModule } from './modules/promotions/promotions.module';
 import { TimeSlotsModule } from './modules/time-slots/time-slots.module';
+import { AuthGoogleModule } from './modules/auth-google/auth-google.module';
 
 @Module({
   imports: [
@@ -57,6 +58,7 @@ import { TimeSlotsModule } from './modules/time-slots/time-slots.module';
     BranchesModule,
     PromotionsModule,
     TimeSlotsModule,
+    AuthGoogleModule,
   ],
   controllers: [],
   providers: [JwtService],
