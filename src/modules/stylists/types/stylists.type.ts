@@ -59,3 +59,28 @@ export class WeeklySchedule {
   @Type(() => DailySchedule)
   days: DailySchedule[];
 }
+
+export class StylistTimeOffResponse {
+  @Expose()
+  id: string;
+
+  @Expose()
+  stylistId: string;
+
+  @Expose()
+  date: string;
+
+  @Expose()
+  startTime: string;
+
+  @Expose()
+  endTime: string;
+
+  @Expose()
+  reason: string;
+
+  @Expose()
+  isFullDay: boolean;
+}
+
+export class StylistTimeOffs extends PaginationResponse<StylistTimeOffResponse> {}
