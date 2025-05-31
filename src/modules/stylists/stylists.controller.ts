@@ -10,6 +10,7 @@ import {
 } from '@nestjs/common';
 import { StylistsService } from './stylists.service';
 import { CreateStylistDto } from './dto/create-stylist.dto';
+import { CreateTimeOffDto } from './dto/create-time-off.dto';
 import { UsersEntity } from '../../database/entities/users.entity';
 import { ApiTags, ApiOperation, ApiBearerAuth } from '@nestjs/swagger';
 import { JwtAuth } from '../../common/decorators/jwt-auth.decorator';
@@ -54,5 +55,33 @@ export class StylistsController {
   @ApiOperation({ summary: 'Lấy lịch làm việc trong 7 ngày của stylist' })
   getWeeklySchedule(@Param('stylistId') stylistId: string) {
     return this.stylistsService.getWeeklySchedule(stylistId);
+  }
+
+  @Get('time-offs/:stylistId')
+  @ApiOperation({ summary: 'Lấy danh sách các ngày nghỉ của stylist' })
+  getStylistTimeOffs(
+    @Param('stylistId') stylistId: string,
+    @Query('startDate') startDate?: string,
+    @Query('endDate') endDate?: string,
+  ) {
+    return this.stylistsService.getStylistTimeOffs(
+      stylistId,
+      startDate,
+      endDate,
+    );
+  }
+
+  @Post('time-off')
+  @JwtAuth()
+  @ApiOperation({ summary: 'Đặt ngày nghỉ cho stylist' })
+  createTimeOff(@Body() createTimeOffDto: CreateTimeOffDto): Promise<MessageResponse> {
+    return this.stylistsService.createTimeOff(createTimeOffDto);
+  }
+
+  @Delete('time-off/:id')
+  @JwtAuth()
+  @ApiOperation({ summary: 'Xóa ngày nghỉ của stylist' })
+  deleteTimeOff(@Param('id') id: string): Promise<MessageResponse> {
+    return this.stylistsService.deleteTimeOff(id);
   }
 }
