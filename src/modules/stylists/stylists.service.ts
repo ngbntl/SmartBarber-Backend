@@ -105,7 +105,6 @@ export class StylistsService {
       const [stylists, total] = await this.userRepository.findAndCount({
         where: {
           roleType: RoleType.STYLIST,
-          isActive: true,
         },
       });
 
@@ -589,6 +588,33 @@ export class StylistsService {
       return {
         statusCode: HttpStatus.OK,
         message: 'Xóa đăng ký ngày nghỉ thành công',
+      };
+    } catch (error) {
+      throw error;
+    }
+  }
+
+  async update(
+    id: string,
+    updateStylistDto: CreateStylistDto,
+  ): Promise<MessageResponse> {
+    try {
+      const stylist = await this.userRepository.findOne({
+        where: { id, roleType: RoleType.STYLIST },
+      });
+
+      if (!stylist) {
+        throw new NotFoundException(MESSAGE.STYLIST_NOT_FOUND);
+      }
+
+      Object.assign(stylist, updateStylistDto);
+      stylist.updatedAt = new Date().getTime();
+
+      await this.userRepository.save(stylist);
+
+      return {
+        statusCode: HttpStatus.OK,
+        message: ' cập nhật thành công',
       };
     } catch (error) {
       throw error;

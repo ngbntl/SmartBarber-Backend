@@ -16,7 +16,6 @@ import {
 import {
   ApiTags,
   ApiOperation,
-  ApiResponse,
   ApiBearerAuth,
   ApiConsumes,
   ApiBody,
@@ -35,9 +34,9 @@ export class ServicesController {
   constructor(private readonly servicesService: ServicesService) {}
 
   @Post()
-  // @UseGuards(JwtAuthGuard)
-  // @Roles('admin')
-  // @ApiBearerAuth()
+  @UseGuards(JwtAuthGuard)
+  @Roles('admin')
+  @ApiBearerAuth()
   @ApiOperation({ summary: 'Create a new service' })
   async createService(
     @Body() createServiceDto: CreateServiceDto,
@@ -46,9 +45,9 @@ export class ServicesController {
   }
 
   @Post('with-image')
-  // @UseGuards(JwtAuthGuard)
-  // @Roles('admin')
-  // @ApiBearerAuth()
+  @UseGuards(JwtAuthGuard)
+  @Roles('admin')
+  @ApiBearerAuth()
   @ApiOperation({ summary: 'Create a new service with image' })
   @ApiConsumes('multipart/form-data')
   @ApiBody({
@@ -120,5 +119,26 @@ export class ServicesController {
   @ApiOperation({ summary: 'Get all active services' })
   async getAllServices(): Promise<Services> {
     return this.servicesService.getAllServices();
+  }
+
+  @Put(':id')
+  @UseGuards(JwtAuthGuard)
+  @Roles('admin')
+  @ApiBearerAuth()
+  @ApiOperation({ summary: 'Update a service by ID' })
+  async updateService(
+    @Param('id') id: string,
+    @Body() updateServiceDto: CreateServiceDto,
+  ): Promise<MessageResponse> {
+    return this.servicesService.updateService(id, updateServiceDto);
+  }
+
+  @Delete(':id')
+  @UseGuards(JwtAuthGuard)
+  @Roles('admin')
+  @ApiBearerAuth()
+  @ApiOperation({ summary: 'Delete a service by ID' })
+  async deleteService(@Param('id') id: string): Promise<MessageResponse> {
+    return this.servicesService.deleteService(id);
   }
 }

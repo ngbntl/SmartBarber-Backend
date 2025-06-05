@@ -15,6 +15,12 @@ export class StylistResponse {
   avatar: string;
 
   @Expose()
+  phoneNumber: string;
+
+  @Expose()
+  email: string;
+
+  @Expose()
   bio: string;
 
   @Expose()

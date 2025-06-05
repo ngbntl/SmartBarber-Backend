@@ -139,4 +139,43 @@ export class ServicesService {
       throw error;
     }
   }
+
+  async updateService(
+    id: string,
+    updateServiceDto: CreateServiceDto,
+  ): Promise<MessageResponse> {
+    try {
+      const service = await this.serviceRepository.findOne({ where: { id } });
+      if (!service) {
+        throw new NotFoundException('Dịch vụ không tồn tại');
+      }
+
+      Object.assign(service, updateServiceDto);
+      await this.serviceRepository.save(service);
+
+      return {
+        statusCode: HttpStatus.OK,
+        message: 'Cập nhật dịch vụ thành công',
+      };
+    } catch (error) {
+      throw error;
+    }
+  }
+
+  async deleteService(id: string): Promise<MessageResponse> {
+    try {
+      const service = await this.serviceRepository.findOne({ where: { id } });
+      if (!service) {
+        throw new NotFoundException('Dịch vụ không tồn tại');
+      }
+      service.isActive = false;
+      await this.serviceRepository.save(service);
+      return {
+        statusCode: HttpStatus.OK,
+        message: 'Xóa dịch vụ thành công',
+      };
+    } catch (error) {
+      throw error;
+    }
+  }
 }

@@ -20,6 +20,9 @@ export class ServicesResponse {
 
   @Expose()
   image: string;
+
+  @Expose()
+  isActive: boolean;
 }
 
 export class Services extends PaginationResponse<ServicesResponse> {}

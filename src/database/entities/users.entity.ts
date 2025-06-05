@@ -35,6 +35,9 @@ export class UsersEntity extends BaseTimestamp {
   @Column('varchar', { name: 'Email', length: 128, nullable: true })
   email: string;
 
+  @Column('varchar', { name: 'PhoneNumber', length: 32, nullable: true })
+  phoneNumber: string;
+
   @Column('tinyint', { name: 'EmailVerified', nullable: true })
   emailVerified: number;
 
