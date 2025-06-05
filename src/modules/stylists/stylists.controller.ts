@@ -74,7 +74,9 @@ export class StylistsController {
   @Post('time-off')
   @JwtAuth()
   @ApiOperation({ summary: 'Đặt ngày nghỉ cho stylist' })
-  createTimeOff(@Body() createTimeOffDto: CreateTimeOffDto): Promise<MessageResponse> {
+  createTimeOff(
+    @Body() createTimeOffDto: CreateTimeOffDto,
+  ): Promise<MessageResponse> {
     return this.stylistsService.createTimeOff(createTimeOffDto);
   }
 
@@ -83,5 +85,16 @@ export class StylistsController {
   @ApiOperation({ summary: 'Xóa ngày nghỉ của stylist' })
   deleteTimeOff(@Param('id') id: string): Promise<MessageResponse> {
     return this.stylistsService.deleteTimeOff(id);
+  }
+
+  @Put(':id')
+  @JwtAuth()
+  @Roles(RoleType.ADMIN)
+  @ApiOperation({ summary: 'Cập nhật thông tin thợ cắt tóc' })
+  update(
+    @Param('id') id: string,
+    @Body() updateStylistDto: CreateStylistDto,
+  ): Promise<MessageResponse> {
+    return this.stylistsService.update(id, updateStylistDto);
   }
 }
