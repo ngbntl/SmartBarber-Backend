@@ -1,12 +1,17 @@
 import { Controller, Get, Post, Body, Param, Put, Query } from '@nestjs/common';
 import { AppointmentsService } from './appointments.service';
-import { CreateAppointmentDto } from './dto/create-appointment.dto';
+import {
+  CreateAppointmentDto,
+  ConfirmAppointmentDto,
+} from './dto/create-appointment.dto';
 import { ApiTags, ApiOperation, ApiBearerAuth } from '@nestjs/swagger';
 
 import { JwtAuth } from '../../common/decorators/jwt-auth.decorator';
 import { Appointments } from './types/appointments.types';
 import { MessageResponse } from 'src/common/types/response';
 import { User } from 'src/common/decorators/current-user.decorator';
+import { Roles } from 'src/common/decorators/roles.decorator';
+import { RoleType } from 'src/common/constants/enum';
 
 @ApiBearerAuth()
 @ApiTags('appointments')
@@ -49,6 +54,22 @@ export class AppointmentsController {
     return this.appointmentsService.cancelAppointment(
       appointmentId,
       currentUser?.id,
+    );
+  }
+
+  @Put('confirm/:appointmentId')
+  @JwtAuth()
+  @Roles(RoleType.STYLIST)
+  @ApiOperation({ summary: 'Stylist xác nhận lịch hẹn của người dùng' })
+  confirmAppointment(
+    @Param('appointmentId') appointmentId: string,
+    @Body() confirmAppointmentDto: ConfirmAppointmentDto,
+    @User() currentUser: any,
+  ): Promise<MessageResponse> {
+    return this.appointmentsService.confirmAppointment(
+      appointmentId,
+      currentUser?.id,
+      confirmAppointmentDto.stylistNote,
     );
   }
 }

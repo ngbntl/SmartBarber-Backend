@@ -499,4 +499,58 @@ export class AppointmentsService {
       throw error;
     }
   }
+
+  async confirmAppointment(
+    appointmentId: string,
+    stylistId: string,
+    stylistNote?: string,
+  ): Promise<MessageResponse> {
+    try {
+      const appointment = await this.appointmentRepository.findOne({
+        where: { id: appointmentId },
+        relations: ['branch', 'user', 'stylist'],
+      });
+
+      if (!appointment) {
+        throw new NotFoundException(MESSAGE.APPOINTMENT_NOT_FOUND);
+      }
+
+      if (appointment.stylistId !== stylistId) {
+        throw new BadRequestException(
+          'Bạn không phải là stylist được chỉ định cho lịch hẹn này',
+        );
+      }
+
+      if (appointment.status !== 'pending') {
+        throw new BadRequestException(
+          `Không thể xác nhận lịch hẹn với trạng thái hiện tại: ${appointment.status}`,
+        );
+      }
+
+      const appointmentDateTime = new Date(appointment.appointmentDate);
+      const [hours, minutes] = appointment.startTime.split(':').map(Number);
+      appointmentDateTime.setHours(hours, minutes);
+
+      const currentTime = new Date();
+      if (appointmentDateTime < currentTime) {
+        throw new BadRequestException('Không thể xác nhận lịch hẹn đã qua');
+      }
+
+      appointment.status = 'confirmed';
+      if (stylistNote) {
+        appointment.notes = appointment.notes
+          ? `${appointment.notes}\n\nGhi chú của stylist: ${stylistNote}`
+          : `Ghi chú của stylist: ${stylistNote}`;
+      }
+
+      await this.appointmentRepository.save(appointment);
+
+      return {
+        statusCode: HttpStatus.OK,
+        message: 'Xác nhận lịch hẹn thành công',
+      };
+    } catch (error) {
+      throw error;
+    }
+  }
 }
