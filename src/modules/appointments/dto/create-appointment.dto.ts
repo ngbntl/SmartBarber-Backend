@@ -70,3 +70,10 @@ export class CreateAppointmentDto {
   @IsOptional()
   notes?: string;
 }
+
+export class ConfirmAppointmentDto {
+  @ApiProperty({ description: 'Ghi chú của stylist (nếu có)', required: false })
+  @IsString()
+  @IsOptional()
+  stylistNote?: string;
+}
