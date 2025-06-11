@@ -147,15 +147,20 @@ export class ServicesService {
     }
   }
 
-  async getServiceById(id: string): Promise<Service> {
+  async getServiceById(id: string): Promise<ServicesResponse> {
     try {
       const service = await this.serviceRepository.findOne({
-        where: { id, isActive: true },
+        where: { id },
       });
+
       if (!service) {
         throw new NotFoundException('Dịch vụ không tồn tại');
       }
-      return service;
+      const serviceResponse = plainToInstance(ServicesResponse, service, {
+        excludeExtraneousValues: true,
+      });
+
+      return serviceResponse;
     } catch (error) {
       throw error;
     }

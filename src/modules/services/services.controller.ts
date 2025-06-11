@@ -26,7 +26,8 @@ import { JwtAuthGuard } from '../../common/guards/jwt-auth.guard';
 import { Roles } from '../../common/decorators/roles.decorator';
 import { MessageResponse } from 'src/common/types/response';
 import { FileInterceptor } from '@nestjs/platform-express';
-import { Services } from './types/services.types';
+
+import { Services, ServicesResponse } from './types/services.types';
 import { RoleType } from 'src/common/constants/enum';
 import { JwtAuth } from 'src/common/decorators/jwt-auth.decorator';
 
@@ -122,7 +123,7 @@ export class ServicesController {
 
   @Get(':id')
   @ApiOperation({ summary: 'Get service by ID' })
-  async getServiceById(@Param('id') id: string): Promise<CreateServiceDto> {
+  async getServiceById(@Param('id') id: string): Promise<ServicesResponse> {
     return this.servicesService.getServiceById(id);
   }
 
