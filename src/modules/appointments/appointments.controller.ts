@@ -4,14 +4,20 @@ import {
   CreateAppointmentDto,
   ConfirmAppointmentDto,
 } from './dto/create-appointment.dto';
-import { ApiTags, ApiOperation, ApiBearerAuth } from '@nestjs/swagger';
+import { UpdateAppointmentStatusDto } from './dto/update-appointment-status.dto';
+import {
+  ApiTags,
+  ApiOperation,
+  ApiBearerAuth,
+  ApiQuery,
+} from '@nestjs/swagger';
 
 import { JwtAuth } from '../../common/decorators/jwt-auth.decorator';
+import { Roles } from '../../common/decorators/roles.decorator';
+import { RoleType } from '../../common/constants/enum';
 import { Appointments } from './types/appointments.types';
 import { MessageResponse } from 'src/common/types/response';
 import { User } from 'src/common/decorators/current-user.decorator';
-import { Roles } from 'src/common/decorators/roles.decorator';
-import { RoleType } from 'src/common/constants/enum';
 
 @ApiBearerAuth()
 @ApiTags('appointments')
@@ -59,7 +65,7 @@ export class AppointmentsController {
 
   @Put('confirm/:appointmentId')
   @JwtAuth()
-  @Roles(RoleType.STYLIST)
+  @Roles([RoleType.STYLIST])
   @ApiOperation({ summary: 'Stylist xác nhận lịch hẹn của người dùng' })
   confirmAppointment(
     @Param('appointmentId') appointmentId: string,
@@ -70,6 +76,67 @@ export class AppointmentsController {
       appointmentId,
       currentUser?.id,
       confirmAppointmentDto.stylistNote,
+    );
+  }
+
+  @Get(':appointmentId')
+  @JwtAuth()
+  @ApiOperation({ summary: 'Lấy chi tiết lịch hẹn theo ID' })
+  getAppointmentById(@Param('appointmentId') appointmentId: string) {
+    return this.appointmentsService.getAppointmentById(appointmentId);
+  }
+
+  @Put('status/:appointmentId')
+  @JwtAuth()
+  @Roles([RoleType.STYLIST])
+  @ApiOperation({
+    summary:
+      'Stylist cập nhật trạng thái lịch hẹn (completed, cancelled, no-show)',
+  })
+  updateAppointmentStatus(
+    @Param('appointmentId') appointmentId: string,
+    @Body() updateStatusDto: UpdateAppointmentStatusDto,
+    @User() currentUser: any,
+  ): Promise<MessageResponse> {
+    return this.appointmentsService.updateAppointmentStatus(
+      appointmentId,
+      currentUser?.id,
+      updateStatusDto,
+    );
+  }
+
+  @Get('today/branch/:branchId')
+  @JwtAuth()
+  @ApiQuery({
+    name: 'stylistId',
+    required: false,
+    description: 'Lọc theo stylist cụ thể (tùy chọn)',
+  })
+  @ApiOperation({
+    summary: 'Lấy danh sách lịch hẹn trong ngày của một chi nhánh',
+  })
+  getTodayAppointments(
+    @Param('branchId') branchId: string,
+    @Query('stylistId') stylistId?: string,
+  ): Promise<Appointments> {
+    return this.appointmentsService.getTodayAppointments(branchId, stylistId);
+  }
+
+  @Get('upcoming/user/:userId')
+  @JwtAuth()
+  @ApiQuery({
+    name: 'days',
+    required: false,
+    description: 'Số ngày sắp tới (mặc định là 7 ngày)',
+  })
+  @ApiOperation({ summary: 'Lấy danh sách lịch hẹn sắp tới của người dùng' })
+  getUpcomingAppointments(
+    @Param('userId') userId: string,
+    @Query('days') days?: number,
+  ): Promise<Appointments> {
+    return this.appointmentsService.getUpcomingAppointments(
+      userId,
+      days ? +days : 7,
     );
   }
 }

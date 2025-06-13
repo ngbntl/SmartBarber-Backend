@@ -553,4 +553,247 @@ export class AppointmentsService {
       throw error;
     }
   }
+
+  async updateAppointmentStatus(
+    appointmentId: string,
+    stylistId: string,
+    { status, note }: { status: string; note?: string },
+  ): Promise<MessageResponse> {
+    try {
+      const appointment = await this.appointmentRepository.findOne({
+        where: { id: appointmentId },
+        relations: ['user', 'stylist', 'branch'],
+      });
+
+      if (!appointment) {
+        throw new NotFoundException(MESSAGE.APPOINTMENT_NOT_FOUND);
+      }
+
+      if (appointment.stylistId !== stylistId) {
+        throw new BadRequestException(
+          'Bạn không phải là stylist được chỉ định cho lịch hẹn này',
+        );
+      }
+
+      const validTransitions = {
+        pending: ['confirmed', 'cancelled'],
+        confirmed: ['completed', 'cancelled', 'no-show'],
+        cancelled: [],
+        completed: [],
+        'no-show': ['confirmed'],
+      };
+
+      if (!validTransitions[appointment.status]?.includes(status)) {
+        throw new BadRequestException(
+          `Không thể chuyển từ trạng thái '${appointment.status}' sang '${status}'`,
+        );
+      }
+
+      if (status === 'completed') {
+        const appointmentDateTime = new Date(appointment.appointmentDate);
+        const [hours, minutes] = appointment.startTime.split(':').map(Number);
+        appointmentDateTime.setHours(hours, minutes);
+
+        const currentTime = new Date();
+        if (appointmentDateTime > currentTime) {
+          throw new BadRequestException(
+            'Không thể đánh dấu hoàn thành lịch hẹn chưa tới thời gian',
+          );
+        }
+      }
+      appointment.status = status;
+
+      if (note) {
+        const notePrefix =
+          status === 'completed'
+            ? 'Ghi chú khi hoàn thành: '
+            : status === 'no-show'
+            ? 'Ghi chú khi khách không đến: '
+            : status === 'cancelled'
+            ? 'Lý do hủy: '
+            : 'Ghi chú: ';
+
+        appointment.notes = appointment.notes
+          ? `${appointment.notes}\n\n${notePrefix}${note}`
+          : `${notePrefix}${note}`;
+      }
+
+      await this.appointmentRepository.save(appointment);
+
+      if (status === 'cancelled') {
+        await this.bookedTimeSlotRepository.delete({
+          appointmentId: appointmentId,
+        });
+      }
+
+      return {
+        statusCode: HttpStatus.OK,
+        message: `Cập nhật trạng thái thành công`,
+      };
+    } catch (error) {
+      throw error;
+    }
+  }
+
+  async getAppointmentById(appointmentId: string): Promise<Appointment> {
+    try {
+      const appointment = await this.appointmentRepository.findOne({
+        where: { id: appointmentId },
+        relations: ['branch', 'user', 'stylist'],
+      });
+
+      if (!appointment) {
+        throw new NotFoundException(MESSAGE.APPOINTMENT_NOT_FOUND);
+      }
+
+      const appointmentServices = await this.appointmentServiceRepository.find({
+        where: { appointmentId },
+        relations: ['service'],
+      });
+
+      appointment.appointmentServices = appointmentServices;
+
+      return appointment;
+    } catch (error) {
+      throw error;
+    }
+  }
+
+  async getTodayAppointments(
+    branchId: string,
+    stylistId?: string,
+  ): Promise<Appointments> {
+    try {
+      const today = new Date();
+      today.setHours(0, 0, 0, 0);
+
+      const tomorrow = new Date(today);
+      tomorrow.setDate(tomorrow.getDate() + 1);
+
+      const whereCondition: any = {
+        branchId,
+        appointmentDate: Between(today, tomorrow),
+      };
+
+      if (stylistId) {
+        whereCondition.stylistId = stylistId;
+      }
+
+      const [appointments, total] =
+        await this.appointmentRepository.findAndCount({
+          where: whereCondition,
+          relations: ['branch', 'user', 'stylist'],
+          order: { appointmentDate: 'ASC', startTime: 'ASC' },
+        });
+
+      if (appointments.length === 0) {
+        return { items: [], total: 0 };
+      }
+
+      const appointmentIds = appointments.map((app) => app.id);
+
+      const appServices = await this.appointmentServiceRepository
+        .createQueryBuilder('as')
+        .select([
+          'as.id',
+          'as.appointmentId',
+          'as.serviceId',
+          'as.price',
+          'as.duration',
+          'as.notes',
+          'service.id',
+          'service.name',
+          'service.description',
+          'service.price',
+          'service.duration',
+          'service.image',
+        ])
+        .innerJoinAndSelect('as.service', 'service')
+        .where('as.appointmentId IN (:...appointmentIds)', { appointmentIds })
+        .getMany();
+
+      const appointmentServicesMap = appServices.reduce((map, service) => {
+        if (!map[service.appointmentId]) {
+          map[service.appointmentId] = [];
+        }
+        map[service.appointmentId].push(service);
+        return map;
+      }, {} as Record<string, AppointmentService[]>);
+
+      for (const appointment of appointments) {
+        appointment.appointmentServices =
+          appointmentServicesMap[appointment.id] || [];
+      }
+
+      const items = plainToInstance(AppointmentResponse, appointments, {
+        excludeExtraneousValues: true,
+      });
+
+      return { items, total };
+    } catch (error) {
+      throw error;
+    }
+  }
+
+  async getUpcomingAppointments(
+    userId: string,
+    days: number = 7,
+  ): Promise<Appointments> {
+    try {
+      const today = new Date();
+      today.setHours(0, 0, 0, 0);
+
+      const endDate = new Date(today);
+      endDate.setDate(endDate.getDate() + days);
+
+      const [appointments, total] =
+        await this.appointmentRepository.findAndCount({
+          where: {
+            userId,
+            appointmentDate: Between(today, endDate),
+            status: 'confirmed',
+          },
+          relations: ['branch', 'stylist'],
+          order: { appointmentDate: 'ASC', startTime: 'ASC' },
+        });
+
+      if (appointments.length === 0) {
+        return { items: [], total: 0 };
+      }
+
+      const appointmentIds = appointments.map((app) => app.id);
+      const appServices = await this.appointmentServiceRepository
+        .createQueryBuilder('as')
+        .select([
+          'as.id',
+          'as.appointmentId',
+          'as.serviceId',
+          'as.price',
+          'as.duration',
+          'as.notes',
+          'service.id',
+          'service.name',
+          'service.description',
+          'service.price',
+          'service.duration',
+          'service.image',
+        ])
+        .innerJoinAndSelect('as.service', 'service')
+        .where('as.appointmentId IN (:...appointmentIds)', { appointmentIds })
+        .getMany();
+
+      for (const appointment of appointments) {
+        appointment.appointmentServices = appServices.filter(
+          (as) => as.appointmentId === appointment.id,
+        );
+      }
+
+      const items = plainToInstance(AppointmentResponse, appointments, {
+        excludeExtraneousValues: true,
+      });
+      return { items, total };
+    } catch (error) {
+      throw error;
+    }
+  }
 }
