@@ -17,7 +17,6 @@ export class Review extends BaseTimestamp {
   @PrimaryGeneratedColumn('uuid')
   id: string;
 
-  // User relationship
   @Column()
   userId: string;
 
@@ -25,7 +24,6 @@ export class Review extends BaseTimestamp {
   @JoinColumn({ name: 'userId' })
   user: UsersEntity;
 
-  // Stylist relationship (tham chiếu tới user có role là stylist)
   @Column({ nullable: true })
   stylistId: string;
 
@@ -33,7 +31,6 @@ export class Review extends BaseTimestamp {
   @JoinColumn({ name: 'stylistId' })
   stylist: UsersEntity;
 
-  // Branch relationship
   @Column({ nullable: true })
   branchId: string;
 
@@ -41,29 +38,25 @@ export class Review extends BaseTimestamp {
   @JoinColumn({ name: 'branchId' })
   branch: Branch;
 
-  // Appointment relationship
   @Column({ nullable: true })
-  appointmentId: string; // Thay đổi từ number sang string do appointment.id là uuid
+  appointmentId: string;
 
   @ManyToOne(() => Appointment)
   @JoinColumn({ name: 'appointmentId' })
   appointment: Appointment;
 
-  // Review details - only overall score, chi tiết được chuyển sang bảng review_ratings
   @Column({ type: 'int' })
-  rating: number; // 1-5 stars (điểm tổng quan)
+  rating: number;
 
   @Column({ type: 'text', nullable: true })
   comment: string;
 
   @Column({ nullable: true })
-  photos: string; // JSON array of photo URLs
+  photos: string;
 
-  // Review status
   @Column({ default: true })
   isVisible: boolean;
 
-  // Review ratings relationship
   @OneToMany(() => ReviewRating, (rating) => rating.review)
   ratings: ReviewRating[];
 }

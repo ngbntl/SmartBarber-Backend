@@ -28,5 +28,5 @@ export class ReviewRating extends BaseTimestamp {
   ratingCategory: 'overall' | 'cleanliness' | 'value' | 'service';
 
   @Column({ name: 'score', type: 'int' })
-  score: number; // Điểm số từ 1-5
+  score: number;
 }

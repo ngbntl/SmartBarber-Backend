@@ -18,6 +18,7 @@ import { Roles } from '../../common/decorators/roles.decorator';
 import { MessageResponse } from 'src/common/types/response';
 import { StylistResponse, Stylists } from './types/stylists.type';
 import { RoleType } from 'src/common/constants/enum';
+import { UpdateStylistDto } from './dto/update-stylist.dto';
 
 @ApiTags('stylists')
 @ApiBearerAuth()
@@ -89,11 +90,11 @@ export class StylistsController {
 
   @Put(':id')
   @JwtAuth()
-  @Roles(RoleType.ADMIN)
+  @Roles([RoleType.ADMIN, RoleType.STYLIST])
   @ApiOperation({ summary: 'Cập nhật thông tin thợ cắt tóc' })
   update(
     @Param('id') id: string,
-    @Body() updateStylistDto: CreateStylistDto,
+    @Body() updateStylistDto: UpdateStylistDto,
   ): Promise<MessageResponse> {
     return this.stylistsService.update(id, updateStylistDto);
   }

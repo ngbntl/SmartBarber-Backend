@@ -113,8 +113,6 @@ export class AuthService {
         firstName: request.firstName,
         lastName: request.lastName,
         roleType: RoleType.USER,
-        props: {},
-        notifyProps: notifyPropsObj,
         lastPasswordUpdate: new Date().getTime(),
         lastPictureUpdate: 0,
         failedAttempts: 0,
@@ -122,11 +120,6 @@ export class AuthService {
         position: '',
         timezone: timeZoneObj,
       });
-
-      const payload = {
-        userId: userId,
-        email,
-      };
 
       const fullName =
         language == 'en'

@@ -40,6 +40,7 @@ import { MailerService } from 'src/helpers/mailer.helper';
 import { StylistSchedule } from '../../database/entities/stylist-schedule.entity';
 import { StylistTimeOff } from '../../database/entities/stylist-time-off.entity';
 import { TimeSlotTemplate } from 'src/database/entities/time-slot-template.entity';
+import { UpdateStylistDto } from './dto/update-stylist.dto';
 
 @Injectable()
 export class StylistsService {
@@ -596,7 +597,7 @@ export class StylistsService {
 
   async update(
     id: string,
-    updateStylistDto: CreateStylistDto,
+    updateStylistDto: UpdateStylistDto,
   ): Promise<MessageResponse> {
     try {
       const stylist = await this.userRepository.findOne({

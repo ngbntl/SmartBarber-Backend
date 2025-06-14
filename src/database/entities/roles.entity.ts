@@ -8,7 +8,6 @@ export class RolesEntity extends BaseTimestamp {
   @PrimaryColumn('varchar', { name: 'Id', length: 26 })
   id: string;
 
-  // Role information
   @Column('varchar', { name: 'Name', length: 64, nullable: true })
   name: string;
 
@@ -18,11 +17,9 @@ export class RolesEntity extends BaseTimestamp {
   @Column('text', { name: 'Description', nullable: true })
   description: string;
 
-  // Permissions and configuration
   @Column('longtext', { name: 'Permissions', nullable: true })
   permissions: string;
 
-  // Role type
   @Column('tinyint', { name: 'SchemeManaged', nullable: true })
   schemeManaged: number;
 

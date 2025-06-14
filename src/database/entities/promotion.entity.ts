@@ -13,7 +13,6 @@ export class Promotion extends BaseTimestamp {
   @PrimaryGeneratedColumn('uuid')
   id: string;
 
-  // Promotion basic information
   @Column()
   name: string;
 
@@ -23,7 +22,6 @@ export class Promotion extends BaseTimestamp {
   @Column({ nullable: true })
   image: string;
 
-  // Discount configuration
   @Column({ type: 'decimal', precision: 10, scale: 2, default: 0 })
   discountAmount: number;
 
@@ -33,23 +31,20 @@ export class Promotion extends BaseTimestamp {
   @Column({ default: false })
   isPercentage: boolean;
 
-  // Validity period
   @Column({ type: 'datetime' })
   startDate: Date;
 
   @Column({ type: 'datetime' })
   endDate: Date;
 
-  // Status
   @Column({ default: true })
   isActive: boolean;
 
-  // Usage configuration
   @Column({ nullable: true })
   code: string;
 
   @Column({ type: 'int', default: -1 })
-  usageLimit: number; // -1 means unlimited
+  usageLimit: number;
 
   @Column({ type: 'int', default: 0 })
   usedCount: number;
@@ -57,7 +52,6 @@ export class Promotion extends BaseTimestamp {
   @Column({ type: 'decimal', precision: 10, scale: 2, nullable: true })
   minimumPurchaseAmount: number;
 
-  // Relationships
   @ManyToMany(() => Service)
   @JoinTable({
     name: 'promotion_services',

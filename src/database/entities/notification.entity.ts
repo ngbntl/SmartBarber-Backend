@@ -14,7 +14,6 @@ export class Notification extends BaseTimestamp {
   @PrimaryGeneratedColumn('uuid')
   id: string;
 
-  // User relationship
   @Column()
   userId: string;
 
@@ -22,18 +21,15 @@ export class Notification extends BaseTimestamp {
   @JoinColumn({ name: 'userId' })
   user: UsersEntity;
 
-  // Notification content
   @Column()
   title: string;
 
   @Column({ type: 'text' })
   content: string;
 
-  // Notification status
   @Column({ default: false })
   isRead: boolean;
 
-  // Notification classification
   @Column({
     type: 'enum',
     enum: NotificationType,
@@ -41,7 +37,6 @@ export class Notification extends BaseTimestamp {
   })
   type: string; // 'appointment', 'promotion', 'system', etc.
 
-  // Reference information
   @Column({ nullable: true })
-  referenceId: string; // ID of the referenced entity (appointment, promotion, etc.)
+  referenceId: string;
 }
