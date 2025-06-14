@@ -14,7 +14,6 @@ export class AppointmentService extends BaseTimestamp {
   @PrimaryGeneratedColumn('uuid')
   id: string;
 
-  // Appointment relationship
   @Column('varchar', { name: 'AppointmentId', length: 36 })
   appointmentId: string;
 
@@ -28,7 +27,6 @@ export class AppointmentService extends BaseTimestamp {
   @JoinColumn({ name: 'AppointmentId' })
   appointment: Appointment;
 
-  // Service relationship
   @Column('varchar', { name: 'ServiceId', length: 26 })
   serviceId: string;
 
@@ -36,7 +34,6 @@ export class AppointmentService extends BaseTimestamp {
   @JoinColumn({ name: 'ServiceId' })
   service: Service;
 
-  // Price at the time of booking (for historical reference)
   @Column({
     name: 'Price',
     type: 'decimal',
@@ -45,11 +42,9 @@ export class AppointmentService extends BaseTimestamp {
   })
   price: number;
 
-  // Duration at the time of booking (for historical reference)
   @Column({ name: 'Duration' })
   duration: number;
 
-  // Any additional notes for this specific service in this appointment
   @Column({ name: 'Notes', type: 'text', nullable: true })
   notes: string;
 }

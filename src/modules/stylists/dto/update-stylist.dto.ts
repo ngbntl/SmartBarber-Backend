@@ -8,18 +8,16 @@ import {
 } from 'class-validator';
 import { ApiProperty } from '@nestjs/swagger';
 
-export class CreateStylistDto {
+export class UpdateStylistDto {
   @ApiProperty({ description: 'Tên thợ cắt tóc' })
   @IsString()
+  @IsOptional()
   firstName: string;
 
   @ApiProperty({ description: 'Họ thợ cắt tóc' })
   @IsString()
+  @IsOptional()
   lastName: string;
-
-  @ApiProperty({ description: 'Email' })
-  @IsString()
-  email: string;
 
   @ApiProperty({ description: 'Chuyên môn', required: false })
   @IsString()
@@ -48,5 +46,6 @@ export class CreateStylistDto {
 
   @ApiProperty({ description: 'ID chi nhánh' })
   @IsString()
+  @IsOptional()
   branchId: string;
 }

@@ -71,6 +71,9 @@ export class AppointmentResponse {
   @Expose()
   notes: string;
 
+  @Expose()
+  isReviewed: boolean;
+
   @Transform(({ value }) => new Date(value), { toClassOnly: true })
   createdAt: Date;
 

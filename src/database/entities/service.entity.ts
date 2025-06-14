@@ -7,7 +7,6 @@ export class Service extends BaseTimestamp {
   @PrimaryColumn('varchar', { length: 26 })
   id: string;
 
-  // Service information
   @Column({ name: 'Name', length: 100 })
   name: string;
 
@@ -20,15 +19,12 @@ export class Service extends BaseTimestamp {
   @Column({ name: 'Duration', comment: 'Thời gian thực hiện dịch vụ (phút)' })
   duration: number;
 
-  // Media
   @Column({ name: 'Image', nullable: true })
   image: string;
 
-  // Status
   @Column({ name: 'IsActive', default: true })
   isActive: boolean;
 
-  // Relationships
   @OneToMany(
     () => AppointmentService,
     (appointmentService) => appointmentService.service,

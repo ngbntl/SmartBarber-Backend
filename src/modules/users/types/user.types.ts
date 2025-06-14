@@ -26,6 +26,15 @@ export class UserResponse {
   email: string;
 
   @Expose()
+  phoneNumber?: string;
+
+  @Expose()
+  specialization?: string;
+
+  @Expose()
+  experienceYears?: number;
+
+  @Expose()
   avatar?: string;
 
   @Expose()

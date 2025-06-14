@@ -6,7 +6,6 @@ export class TokensEntity extends BaseTimestamp {
   @PrimaryGeneratedColumn('uuid', { name: 'Id' })
   id: string;
 
-  // Token values
   @Column({
     nullable: false,
     name: 'RefreshToken',
@@ -14,7 +13,6 @@ export class TokensEntity extends BaseTimestamp {
   })
   refreshToken: string;
 
-  // Public keys
   @Column({
     nullable: false,
     name: 'refreshPublicKey',
@@ -29,14 +27,12 @@ export class TokensEntity extends BaseTimestamp {
   })
   accessPublicKey: string;
 
-  // User relationship
   @Column({
     nullable: false,
     name: 'UserId',
   })
   userId: string;
 
-  // Token expiration
   @Column({
     nullable: false,
     name: 'ExpireAt',

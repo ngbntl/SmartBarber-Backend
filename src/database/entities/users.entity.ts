@@ -55,12 +55,6 @@ export class UsersEntity extends BaseTimestamp {
   })
   roleType: RoleType;
 
-  @Column('json', { name: 'Props', nullable: true })
-  props: Record<string, any>;
-
-  @Column('json', { name: 'NotifyProps', nullable: true })
-  notifyProps: Record<string, any>;
-
   @Column('varchar', { name: 'Locale', length: 5, nullable: true })
   locale: string;
 
@@ -78,9 +72,6 @@ export class UsersEntity extends BaseTimestamp {
 
   @Column('varchar', { name: 'Position', length: 128, nullable: true })
   position: string;
-
-  @Column('varchar', { name: 'RemoteId', length: 26, nullable: true })
-  remoteId: string;
 
   @Column({ name: 'Avatar', nullable: true })
   avatar: string;

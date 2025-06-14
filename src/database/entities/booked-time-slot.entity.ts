@@ -15,15 +15,12 @@ export class BookedTimeSlot extends BaseTimestamp {
   @PrimaryGeneratedColumn('uuid')
   id: string;
 
-  // Ngày được đặt
   @Column({ name: 'BookingDate', type: 'date' })
   bookingDate: Date;
 
-  // Khung giờ
   @Column({ name: 'StartTime', type: 'time' })
   startTime: string;
 
-  // Liên kết đến TimeSlotTemplate
   @Column('varchar', { name: 'TimeSlotTemplateId', length: 36, nullable: true })
   timeSlotTemplateId: string;
 
@@ -31,7 +28,6 @@ export class BookedTimeSlot extends BaseTimestamp {
   @JoinColumn({ name: 'TimeSlotTemplateId' })
   timeSlotTemplate: TimeSlotTemplate;
 
-  // Stylist
   @Column('varchar', { name: 'StylistId', length: 26, nullable: true })
   stylistId: string;
 
@@ -39,7 +35,6 @@ export class BookedTimeSlot extends BaseTimestamp {
   @JoinColumn({ name: 'StylistId' })
   stylist: UsersEntity;
 
-  // Liên kết với appointment
   @Column('varchar', { name: 'AppointmentId', length: 36 })
   appointmentId: string;
 

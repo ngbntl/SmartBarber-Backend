@@ -17,7 +17,6 @@ export class Appointment extends BaseTimestamp {
   @PrimaryGeneratedColumn('uuid')
   id: string;
 
-  // User relationship
   @Column('varchar', { name: 'UserId', length: 26 })
   userId: string;
 
@@ -25,19 +24,16 @@ export class Appointment extends BaseTimestamp {
   @JoinColumn({ name: 'UserId' })
   user: UsersEntity;
 
-  // AppointmentService relationship - replacing direct Service relationship
   @OneToMany(
     () => AppointmentService,
     (appointmentService) => appointmentService.appointment,
     {
       cascade: true,
-      // Tắt eager loading để tránh lỗi
       eager: false,
     },
   )
   appointmentServices: AppointmentService[];
 
-  // Stylist relationship
   @Column('varchar', { name: 'StylistId', length: 26, nullable: true })
   stylistId: string;
 
@@ -45,7 +41,6 @@ export class Appointment extends BaseTimestamp {
   @JoinColumn({ name: 'StylistId' })
   stylist: UsersEntity;
 
-  // Branch relationship
   @Column('varchar', { name: 'BranchId', length: 36 })
   branchId: string;
 
@@ -53,7 +48,6 @@ export class Appointment extends BaseTimestamp {
   @JoinColumn({ name: 'BranchId' })
   branch: Branch;
 
-  // Appointment time details
   @Column({ name: 'AppointmentDate', type: 'datetime' })
   appointmentDate: Date;
 
@@ -63,7 +57,6 @@ export class Appointment extends BaseTimestamp {
   @Column({ name: 'DurationMinutes', type: 'int' })
   durationMinutes: number;
 
-  // Appointment status
   @Column({
     name: 'Status',
     type: 'enum',
@@ -72,7 +65,6 @@ export class Appointment extends BaseTimestamp {
   })
   status: string;
 
-  // Financial details
   @Column({
     name: 'TotalAmount',
     type: 'decimal',
@@ -100,22 +92,18 @@ export class Appointment extends BaseTimestamp {
   })
   finalAmount: number;
 
-  // Payment details
   @Column({ name: 'IsPaid', default: false })
   isPaid: boolean;
 
   @Column({ name: 'PaymentMethod', nullable: true })
   paymentMethod: string;
 
-  // Promotion reference
   @Column({ name: 'PromotionId', nullable: true })
   promotionId: string;
 
-  // Additional info
   @Column({ name: 'Notes', type: 'text', nullable: true })
   notes: string;
 
-  // Review status and relationship
   @Column({ name: 'IsReviewed', default: false })
   isReviewed: boolean;
 
