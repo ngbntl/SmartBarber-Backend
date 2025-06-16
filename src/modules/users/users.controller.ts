@@ -13,7 +13,7 @@ import {
 } from '@nestjs/common';
 import { UsersService } from './users.service';
 import { plainToClass } from 'class-transformer';
-import { UserResponse } from './types/user.types';
+import { UserResponse, Users } from './types/user.types';
 import { JwtAuth } from 'src/common/decorators/jwt-auth.decorator';
 import {
   ApiBearerAuth,
@@ -77,5 +77,11 @@ export class UsersController {
   ): Promise<UploadAvatarResponseDto> {
     const avatarUrl = await this.userService.uploadAvatar(currentUser.id, file);
     return { avatarUrl };
+  }
+
+  @Get()
+  @ApiOperation({ summary: 'Get all users' })
+  async getAllUsers(): Promise<Users> {
+    return this.userService.findAll();
   }
 }

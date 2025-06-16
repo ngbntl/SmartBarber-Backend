@@ -31,6 +31,8 @@ export class TimeSlotsService {
     private stylistService: StylistsService,
   ) {}
 
+  // Client methods
+
   async getAvailableTimeSlotsByStylist(
     stylistId: string,
     date?: string,
@@ -381,5 +383,175 @@ export class TimeSlotsService {
       items: formattedItems,
       total: formattedItems.length,
     };
+  }
+
+  // Admin methods for managing time slot templates
+
+  async getAllTimeSlotTemplates() {
+    const timeSlots = await this.timeSlotTemplateRepository.find({
+      order: {
+        startTime: 'ASC',
+      },
+    });
+
+    return {
+      items: timeSlots,
+      total: timeSlots.length,
+    };
+  }
+
+  async getTimeSlotTemplateById(id: string) {
+    const timeSlot = await this.timeSlotTemplateRepository.findOne({
+      where: { id },
+    });
+
+    if (!timeSlot) {
+      throw new NotFoundException('Không tìm thấy khung giờ');
+    }
+
+    return timeSlot;
+  }
+
+  async createTimeSlotTemplate(
+    startTime: string,
+    endTime: string,
+    description?: string,
+  ) {
+    // Validate time format
+    if (
+      !/^([0-1]?[0-9]|2[0-3]):[0-5][0-9](:[0-5][0-9])?$/.test(startTime) ||
+      !/^([0-1]?[0-9]|2[0-3]):[0-5][0-9](:[0-5][0-9])?$/.test(endTime)
+    ) {
+      throw new BadRequestException(
+        'Định dạng thời gian không hợp lệ. Sử dụng định dạng HH:MM hoặc HH:MM:SS',
+      );
+    }
+
+    // Validate start time is before end time
+    if (startTime >= endTime) {
+      throw new BadRequestException(
+        'Thời gian bắt đầu phải trước thời gian kết thúc',
+      );
+    }
+
+    // Check for overlap with existing time slots
+    const existingTimeSlots = await this.timeSlotTemplateRepository.find({
+      where: { isActive: true },
+    });
+
+    const hasOverlap = existingTimeSlots.some((slot) =>
+      this.isTimeOverlap(startTime, endTime, slot.startTime, slot.endTime),
+    );
+
+    if (hasOverlap) {
+      throw new BadRequestException(
+        'Khung giờ này trùng lặp với khung giờ đã tồn tại',
+      );
+    }
+
+    const now = Date.now();
+    const newTimeSlot = this.timeSlotTemplateRepository.create({
+      startTime,
+      endTime,
+      description,
+      isActive: true,
+      createdAt: now,
+      updatedAt: now,
+      deletedAt: null,
+    });
+
+    return await this.timeSlotTemplateRepository.save(newTimeSlot);
+  }
+
+  async updateTimeSlotTemplate(
+    id: string,
+    startTime?: string,
+    endTime?: string,
+    description?: string,
+    isActive?: boolean,
+  ) {
+    const timeSlot = await this.getTimeSlotTemplateById(id);
+
+    // Validate time format if provided
+    if (
+      startTime &&
+      !/^([0-1]?[0-9]|2[0-3]):[0-5][0-9](:[0-5][0-9])?$/.test(startTime)
+    ) {
+      throw new BadRequestException('Định dạng thời gian bắt đầu không hợp lệ');
+    }
+
+    if (
+      endTime &&
+      !/^([0-1]?[0-9]|2[0-3]):[0-5][0-9](:[0-5][0-9])?$/.test(endTime)
+    ) {
+      throw new BadRequestException(
+        'Định dạng thời gian kết thúc không hợp lệ',
+      );
+    }
+
+    // Use existing values if not provided
+    const updatedStartTime = startTime || timeSlot.startTime;
+    const updatedEndTime = endTime || timeSlot.endTime;
+
+    // Validate start time is before end time
+    if (updatedStartTime >= updatedEndTime) {
+      throw new BadRequestException(
+        'Thời gian bắt đầu phải trước thời gian kết thúc',
+      );
+    }
+
+    // Check for overlap with existing time slots if times are changed
+    if (startTime || endTime) {
+      const existingTimeSlots = await this.timeSlotTemplateRepository.find({
+        where: { id: Not(id), isActive: true },
+      });
+
+      const hasOverlap = existingTimeSlots.some((slot) =>
+        this.isTimeOverlap(
+          updatedStartTime,
+          updatedEndTime,
+          slot.startTime,
+          slot.endTime,
+        ),
+      );
+
+      if (hasOverlap) {
+        throw new BadRequestException(
+          'Khung giờ này trùng lặp với khung giờ đã tồn tại',
+        );
+      }
+    }
+
+    // Update the time slot
+    if (startTime) timeSlot.startTime = startTime;
+    if (endTime) timeSlot.endTime = endTime;
+    if (description !== undefined) timeSlot.description = description;
+    if (isActive !== undefined) timeSlot.isActive = isActive;
+
+    // Update timestamp manually to ensure it's set
+    timeSlot.updatedAt = Date.now();
+
+    return await this.timeSlotTemplateRepository.save(timeSlot);
+  }
+
+  async deleteTimeSlotTemplate(id: string) {
+    const timeSlot = await this.getTimeSlotTemplateById(id);
+
+    // Check if there are any booked time slots using this template
+    const bookedSlots = await this.bookedTimeSlotRepository.count({
+      where: { timeSlotTemplateId: id },
+    });
+
+    if (bookedSlots > 0) {
+      // Instead of deleting, just deactivate
+      timeSlot.isActive = false;
+      await this.timeSlotTemplateRepository.save(timeSlot);
+      return {
+        message: 'Khung giờ đã được đặt lịch nên chỉ có thể vô hiệu hóa',
+      };
+    }
+
+    await this.timeSlotTemplateRepository.remove(timeSlot);
+    return { message: 'Xóa khung giờ thành công' };
   }
 }

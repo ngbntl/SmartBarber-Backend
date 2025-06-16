@@ -22,6 +22,13 @@ import { MessageResponse } from 'src/common/types/response';
 export class ReviewsController {
   constructor(private readonly reviewsService: ReviewsService) {}
 
+  @Get()
+  @JwtAuth()
+  @ApiOperation({ summary: 'Lấy tất cả đánh giá' })
+  getAllReviews() {
+    return this.reviewsService.getAllReviews();
+  }
+
   @Post()
   @JwtAuth()
   @ApiOperation({

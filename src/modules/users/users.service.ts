@@ -6,6 +6,9 @@ import { UpdateProfileDto } from './dto/update-profile.dto';
 import { MESSAGE } from 'src/common/constants/message';
 import { MessageResponse } from 'src/common/types/response';
 import { CloudinaryService } from 'src/helpers/cloudinary.helper';
+import { UserResponse, Users } from './types/user.types';
+import { plainToInstance } from 'class-transformer';
+import { RoleType } from 'src/common/constants/enum';
 
 @Injectable()
 export class UsersService {
@@ -15,6 +18,20 @@ export class UsersService {
     private readonly cloudinaryService: CloudinaryService,
   ) {}
 
+  async findAll(): Promise<Users> {
+    const [users, total] = await this.userRes.findAndCount({
+      where: { roleType: RoleType.USER },
+    });
+
+    const items = plainToInstance(UserResponse, users, {
+      excludeExtraneousValues: true,
+    });
+
+    return {
+      items: items,
+      total: total,
+    };
+  }
   async findByEmail(email: string): Promise<UsersEntity> {
     return await this.userRes.findOne({ where: { email } });
   }

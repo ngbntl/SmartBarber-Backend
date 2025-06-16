@@ -57,4 +57,24 @@ export class PromotionsController {
   findOne(@Param('id') id: string) {
     return this.promotionsService.findOne(id);
   }
+
+  @Put(':id')
+  @JwtAuth()
+  @Roles(RoleType.ADMIN)
+  @ApiOperation({ summary: 'Cập nhật thông tin khuyến mãi' })
+  @ApiParam({ name: 'id', description: 'ID của khuyến mãi cần cập nhật' })
+  update(
+    @Param('id') id: string,
+    @Body() updatePromotionDto: CreatePromotionDto,
+  ) {
+    return this.promotionsService.update(id, updatePromotionDto);
+  }
+  @Delete(':id')
+  @JwtAuth()
+  @Roles(RoleType.ADMIN)
+  @ApiOperation({ summary: 'Xóa khuyến mãi' })
+  @ApiParam({ name: 'id', description: 'ID của khuyến mãi cần xóa' })
+  delete(@Param('id') id: string) {
+    return this.promotionsService.remove(id);
+  }
 }

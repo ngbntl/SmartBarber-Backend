@@ -1,4 +1,5 @@
 import { Expose, Transform } from 'class-transformer';
+import { PaginationResponse } from 'src/common/types/pagination';
 
 export class UserResponse {
   @Expose()
@@ -41,6 +42,9 @@ export class UserResponse {
   roleType: string;
 
   @Expose()
+  isActive: boolean;
+
+  @Expose()
   @Transform(({ obj }) => new Date(parseInt(obj.createAt, 10)))
   createAt?: Date;
 
@@ -56,3 +60,5 @@ export class UserResponse {
   )
   deleteAt?: Date;
 }
+
+export class Users extends PaginationResponse<UserResponse> {}

@@ -27,6 +27,45 @@ export class ReviewsService {
     private appointmentRepository: Repository<Appointment>,
   ) {}
 
+  async getAllReviews(): Promise<Reviews> {
+    try {
+      const [reviews, total] = await this.reviewRepository.findAndCount({
+        where: { isVisible: true },
+        relations: ['ratings', 'user', 'stylist'],
+        order: { createdAt: 'DESC' },
+      });
+
+      // Format response
+      const formattedReviews = reviews.map((review) => {
+        // Parse photos từ JSON string thành array nếu có
+        if (review.photos) {
+          review['photos'] = JSON.parse(review.photos);
+        }
+
+        // Thêm thông tin người dùng và stylist
+        if (review.user) {
+          review['userName'] =
+            review.user.firstName + ' ' + review.user.lastName;
+          review['userAvatar'] = review.user.avatar;
+        }
+
+        if (review.stylist) {
+          review['stylistName'] =
+            review.stylist.firstName + ' ' + review.stylist.lastName;
+        }
+
+        return review;
+      });
+
+      const items = plainToInstance(ReviewResponse, formattedReviews, {
+        excludeExtraneousValues: true,
+      });
+
+      return { items, total };
+    } catch (error) {
+      throw error;
+    }
+  }
   async createReview(
     userId: string,
     createReviewDto: CreateReviewDto,

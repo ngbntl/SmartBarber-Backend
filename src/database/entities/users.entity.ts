@@ -15,7 +15,7 @@ import { StylistSchedule } from './stylist-schedule.entity';
 import { StylistTimeOff } from './stylist-time-off.entity';
 
 @Exclude()
-@Entity('Users')
+@Entity('users')
 export class UsersEntity extends BaseTimestamp {
   @PrimaryColumn('varchar', { length: 26 })
   id: string;

@@ -111,15 +111,36 @@ export class ServicesService {
 
   async getAllServices(): Promise<Services> {
     try {
-      const [services, total] = await this.serviceRepository.findAndCount({
-        where: { isActive: true },
+      const services = await this.serviceRepository
+        .createQueryBuilder('service')
+        .leftJoinAndSelect('service.appointmentServices', 'appointmentService')
+        .select([
+          'service.id',
+          'service.name',
+          'service.description',
+          'service.price',
+          'service.duration',
+          'service.image',
+          'service.isActive',
+          'COUNT(appointmentService.id) as bookingCount',
+        ])
+        .where('service.isActive = :isActive', { isActive: true })
+        .groupBy('service.id')
+        .getRawAndEntities();
+
+      const transformedServices = services.entities.map((service, index) => {
+        const rawResult = services.raw[index];
+        const serviceWithCount = plainToInstance(ServicesResponse, service, {
+          excludeExtraneousValues: true,
+        });
+        serviceWithCount.bookingCount = parseInt(rawResult.bookingCount) || 0;
+        return serviceWithCount;
       });
 
-      const items = plainToInstance(ServicesResponse, services, {
-        excludeExtraneousValues: true,
-      });
-
-      return { items, total };
+      return {
+        items: transformedServices,
+        total: transformedServices.length,
+      };
     } catch (error) {
       console.error('Error fetching services:', error);
       throw error;
