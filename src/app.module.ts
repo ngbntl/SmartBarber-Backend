@@ -29,6 +29,8 @@ import { BranchesModule } from './modules/branches/branches.module';
 import { PromotionsModule } from './modules/promotions/promotions.module';
 import { TimeSlotsModule } from './modules/time-slots/time-slots.module';
 import { ReviewsModule } from './modules/reviews/reviews.module';
+import { HaircolorsModule } from './modules/haircolors/haircolors.module';
+import { HairstylesModule } from './modules/hairstyles/hairstyles.module';
 
 @Module({
   imports: [
@@ -59,6 +61,8 @@ import { ReviewsModule } from './modules/reviews/reviews.module';
     PromotionsModule,
     TimeSlotsModule,
     ReviewsModule,
+    HaircolorsModule,
+    HairstylesModule,
   ],
   controllers: [],
   providers: [JwtService],
