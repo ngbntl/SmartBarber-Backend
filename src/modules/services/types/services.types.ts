@@ -23,6 +23,9 @@ export class ServicesResponse {
 
   @Expose()
   isActive: boolean;
+
+  @Expose()
+  bookingCount: number;
 }
 
 export class Services extends PaginationResponse<ServicesResponse> {}

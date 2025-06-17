@@ -121,6 +121,12 @@ export class ServicesController {
     return this.servicesService.getAllServices();
   }
 
+  @Get('with-booking-count')
+  @ApiOperation({ summary: 'Get all active services with booking count' })
+  async getServicesWithBookingCount(): Promise<Services> {
+    return this.servicesService.getAllServices();
+  }
+
   @Put(':id')
   @UseGuards(JwtAuthGuard)
   @Roles('admin')

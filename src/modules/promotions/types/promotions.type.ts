@@ -18,7 +18,7 @@ export class PromotionsResponse {
   discountAmount: number;
 
   @Expose()
-  discountPercen: number;
+  discountPercent: number;
 
   @Expose()
   minimumPurchaseAmount: number;

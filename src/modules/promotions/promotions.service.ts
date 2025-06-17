@@ -6,7 +6,7 @@ import {
   HttpStatus,
 } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { In, LessThanOrEqual, MoreThanOrEqual, Repository } from 'typeorm';
+import { In, LessThanOrEqual, MoreThanOrEqual, Not, Repository } from 'typeorm';
 import { Promotion } from '../../database/entities/promotion.entity';
 import { Service } from '../../database/entities/service.entity';
 import { UsersEntity } from '../../database/entities/users.entity';
@@ -141,7 +141,34 @@ export class PromotionsService {
     }
     return promotion;
   }
+  async update(
+    id: string,
+    updatePromotionDto: CreatePromotionDto,
+  ): Promise<MessageResponse> {
+    const promotion = await this.promotionRepository.findOne({ where: { id } });
+    if (!promotion) {
+      throw new NotFoundException(`Khuyến mãi với ID ${id} không tồn tại`);
+    }
 
+    if (updatePromotionDto.code) {
+      const existingPromotion = await this.promotionRepository.findOne({
+        where: { code: updatePromotionDto.code, id: Not(id) },
+      });
+      if (existingPromotion) {
+        throw new ConflictException(
+          `Mã khuyến mãi ${updatePromotionDto.code} đã tồn tại`,
+        );
+      }
+    }
+
+    Object.assign(promotion, updatePromotionDto);
+    const updatedPromotion = await this.promotionRepository.save(promotion);
+
+    return {
+      statusCode: HttpStatus.OK,
+      message: 'Khuyến mãi đã được cập nhật thành công',
+    };
+  }
   async remove(id: string): Promise<void> {
     const result = await this.promotionRepository.delete(id);
     if (result.affected === 0) {
