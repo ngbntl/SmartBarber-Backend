@@ -8,7 +8,6 @@ import {
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { Review } from '../../database/entities/review.entity';
-import { ReviewRating } from '../../database/entities/review-rating.entity';
 import { Appointment } from '../../database/entities/appointment.entity';
 import { CreateReviewDto } from './dto/create-review.dto';
 import { MessageResponse } from 'src/common/types/response';
@@ -21,8 +20,6 @@ export class ReviewsService {
   constructor(
     @InjectRepository(Review)
     private reviewRepository: Repository<Review>,
-    @InjectRepository(ReviewRating)
-    private reviewRatingRepository: Repository<ReviewRating>,
     @InjectRepository(Appointment)
     private appointmentRepository: Repository<Appointment>,
   ) {}
@@ -31,7 +28,7 @@ export class ReviewsService {
     try {
       const [reviews, total] = await this.reviewRepository.findAndCount({
         where: { isVisible: true },
-        relations: ['ratings', 'user', 'stylist'],
+        relations: ['user', 'stylist'], // Loại bỏ 'ratings'
         order: { createdAt: 'DESC' },
       });
 
@@ -132,7 +129,7 @@ export class ReviewsService {
     try {
       const review = await this.reviewRepository.findOne({
         where: { appointmentId },
-        relations: ['ratings'],
+        // Loại bỏ relations: ['ratings']
       });
 
       if (!review) {
@@ -154,7 +151,7 @@ export class ReviewsService {
     try {
       const [reviews, total] = await this.reviewRepository.findAndCount({
         where: { stylistId, isVisible: true },
-        relations: ['ratings', 'user', 'stylist'],
+        relations: ['user', 'stylist'], // Loại bỏ 'ratings'
         order: { createdAt: 'DESC' },
       });
 

@@ -4,13 +4,11 @@ import {
   ManyToOne,
   JoinColumn,
   PrimaryGeneratedColumn,
-  OneToMany,
 } from 'typeorm';
 import { UsersEntity } from './users.entity';
 import { Branch } from './branch.entity';
 import { Appointment } from './appointment.entity';
 import { BaseTimestamp } from './base-timestamp';
-import { ReviewRating } from './review-rating.entity';
 
 @Entity('reviews')
 export class Review extends BaseTimestamp {
@@ -56,7 +54,4 @@ export class Review extends BaseTimestamp {
 
   @Column({ default: true })
   isVisible: boolean;
-
-  @OneToMany(() => ReviewRating, (rating) => rating.review)
-  ratings: ReviewRating[];
 }

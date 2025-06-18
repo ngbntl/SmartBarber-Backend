@@ -37,7 +37,6 @@ export class ServicesController {
   @UseGuards(JwtAuthGuard)
   @Roles('admin')
   @ApiBearerAuth()
-  @ApiOperation({ summary: 'Create a new service' })
   async createService(
     @Body() createServiceDto: CreateServiceDto,
   ): Promise<MessageResponse> {
@@ -48,7 +47,6 @@ export class ServicesController {
   @UseGuards(JwtAuthGuard)
   @Roles('admin')
   @ApiBearerAuth()
-  @ApiOperation({ summary: 'Create a new service with image' })
   @ApiConsumes('multipart/form-data')
   @ApiBody({
     schema: {
@@ -86,7 +84,6 @@ export class ServicesController {
   @UseGuards(JwtAuthGuard)
   @Roles('admin')
   @ApiBearerAuth()
-  @ApiOperation({ summary: 'Upload image for a service' })
   @ApiConsumes('multipart/form-data')
   @ApiBody({
     schema: {
@@ -116,13 +113,11 @@ export class ServicesController {
   }
 
   @Get()
-  @ApiOperation({ summary: 'Get all active services' })
   async getAllServices(): Promise<Services> {
     return this.servicesService.getAllServices();
   }
 
   @Get('with-booking-count')
-  @ApiOperation({ summary: 'Get all active services with booking count' })
   async getServicesWithBookingCount(): Promise<Services> {
     return this.servicesService.getAllServices();
   }
@@ -131,7 +126,6 @@ export class ServicesController {
   @UseGuards(JwtAuthGuard)
   @Roles('admin')
   @ApiBearerAuth()
-  @ApiOperation({ summary: 'Update a service by ID' })
   async updateService(
     @Param('id') id: string,
     @Body() updateServiceDto: CreateServiceDto,
@@ -143,7 +137,6 @@ export class ServicesController {
   @UseGuards(JwtAuthGuard)
   @Roles('admin')
   @ApiBearerAuth()
-  @ApiOperation({ summary: 'Delete a service by ID' })
   async deleteService(@Param('id') id: string): Promise<MessageResponse> {
     return this.servicesService.deleteService(id);
   }

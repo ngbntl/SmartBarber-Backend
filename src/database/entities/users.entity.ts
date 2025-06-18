@@ -26,12 +26,6 @@ export class UsersEntity extends BaseTimestamp {
   @Column('varchar', { name: 'Password', length: 128, nullable: true })
   password: string;
 
-  @Column('varchar', { name: 'AuthData', length: 128, nullable: true })
-  authData: string;
-
-  @Column('varchar', { name: 'AuthService', length: 32, nullable: true })
-  authService: string;
-
   @Column('varchar', { name: 'Email', length: 128, nullable: true })
   email: string;
 

@@ -9,7 +9,7 @@ import { Appointment } from './appointment.entity';
 import { Service } from './service.entity';
 import { BaseTimestamp } from './base-timestamp';
 
-@Entity('AppointmentServices')
+@Entity('appointmentservices')
 export class AppointmentService extends BaseTimestamp {
   @PrimaryGeneratedColumn('uuid')
   id: string;

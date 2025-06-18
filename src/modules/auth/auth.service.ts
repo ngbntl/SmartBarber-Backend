@@ -107,7 +107,6 @@ export class AuthService {
         deletedAt: 0,
         username: email.substring(0, email.indexOf('@')),
         password: hashedPassword,
-        authService: '',
         email,
         emailVerified: 0,
         firstName: request.firstName,

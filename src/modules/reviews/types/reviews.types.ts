@@ -1,23 +1,5 @@
 import { ApiProperty, ApiResponseProperty } from '@nestjs/swagger';
-import { Expose, Type } from 'class-transformer';
-
-export class ReviewRatingResponse {
-  @Expose()
-  @ApiResponseProperty()
-  id: string;
-
-  @Expose()
-  @ApiResponseProperty()
-  reviewId: string;
-
-  @Expose()
-  @ApiResponseProperty()
-  ratingCategory: string;
-
-  @Expose()
-  @ApiResponseProperty()
-  score: number;
-}
+import { Expose } from 'class-transformer';
 
 export class ReviewResponse {
   @Expose()
@@ -75,11 +57,6 @@ export class ReviewResponse {
   @Expose()
   @ApiResponseProperty()
   createdAt: Date;
-
-  @Expose()
-  @Type(() => ReviewRatingResponse)
-  @ApiResponseProperty({ type: [ReviewRatingResponse] })
-  ratings: ReviewRatingResponse[];
 }
 
 export class Reviews {
