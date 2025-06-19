@@ -27,15 +27,18 @@ import { Roles } from '../../common/decorators/roles.decorator';
 import { MessageResponse } from 'src/common/types/response';
 import { FileInterceptor } from '@nestjs/platform-express';
 import { Services } from './types/services.types';
+import { RoleType } from 'src/common/constants/enum';
+import { JwtAuth } from 'src/common/decorators/jwt-auth.decorator';
 
 @ApiTags('services')
+@ApiBearerAuth()
 @Controller('services')
 export class ServicesController {
   constructor(private readonly servicesService: ServicesService) {}
 
   @Post()
-  @UseGuards(JwtAuthGuard)
-  @Roles('admin')
+  @JwtAuth()
+  @Roles(RoleType.ADMIN)
   @ApiBearerAuth()
   async createService(
     @Body() createServiceDto: CreateServiceDto,
@@ -44,8 +47,8 @@ export class ServicesController {
   }
 
   @Post('with-image')
-  @UseGuards(JwtAuthGuard)
-  @Roles('admin')
+  @JwtAuth()
+  @Roles(RoleType.ADMIN)
   @ApiBearerAuth()
   @ApiConsumes('multipart/form-data')
   @ApiBody({
@@ -81,8 +84,8 @@ export class ServicesController {
   }
 
   @Post('upload-image/:id')
-  @UseGuards(JwtAuthGuard)
-  @Roles('admin')
+  @JwtAuth()
+  @Roles(RoleType.ADMIN)
   @ApiBearerAuth()
   @ApiConsumes('multipart/form-data')
   @ApiBody({
@@ -129,8 +132,8 @@ export class ServicesController {
   }
 
   @Put(':id')
-  @UseGuards(JwtAuthGuard)
-  @Roles('admin')
+  @JwtAuth()
+  @Roles(RoleType.ADMIN)
   @ApiBearerAuth()
   async updateService(
     @Param('id') id: string,
@@ -140,8 +143,8 @@ export class ServicesController {
   }
 
   @Delete(':id')
-  @UseGuards(JwtAuthGuard)
-  @Roles('admin')
+  @JwtAuth()
+  @Roles(RoleType.ADMIN)
   @ApiBearerAuth()
   async deleteService(@Param('id') id: string): Promise<MessageResponse> {
     return this.servicesService.deleteService(id);
