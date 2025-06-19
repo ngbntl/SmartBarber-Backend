@@ -32,7 +32,10 @@ export class TimeSlotsController {
 
   @Get('stylist/:stylistId')
   @JwtAuth()
-  @ApiOperation({ summary: 'Lấy danh sách khung giờ rảnh của một stylist' })
+  @ApiOperation({
+    summary:
+      'Lấy danh sách khung giờ rảnh của một stylist từ thời điểm hiện tại',
+  })
   async getAvailableTimeSlotsByStylist(
     @Param('stylistId') stylistId: string,
     @Query('date') date?: string,

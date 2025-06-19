@@ -43,6 +43,7 @@ export class TimeSlotsService {
       throw new NotFoundException(MESSAGE.STYLIST_NOT_FOUND);
     }
 
+    // Xử lý tham số ngày
     let requestDate = new Date();
     if (date) {
       try {
@@ -56,6 +57,7 @@ export class TimeSlotsService {
       }
     }
 
+    // Nếu ngày yêu cầu là trong quá khứ, đặt lại thành ngày hiện tại
     const today = new Date();
     if (
       requestDate.getFullYear() < today.getFullYear() ||
@@ -65,12 +67,13 @@ export class TimeSlotsService {
         requestDate.getMonth() === today.getMonth() &&
         requestDate.getDate() < today.getDate())
     ) {
-      requestDate = today;
+      requestDate = new Date(); // Đặt lại thành ngày và giờ hiện tại
     }
 
     const dayOfWeek = getDayOfWeek(requestDate);
     const dateString = formatDate(requestDate);
 
+    // Kiểm tra xem stylist có làm việc vào ngày này không
     const workingDay = await this.stylistScheduleRepository.findOne({
       where: {
         stylistId,
@@ -86,6 +89,7 @@ export class TimeSlotsService {
       };
     }
 
+    // Kiểm tra xem stylist có đăng ký nghỉ cả ngày không
     const timeOffDay = await this.stylistTimeOffRepository.findOne({
       where: {
         stylistId,
@@ -102,6 +106,7 @@ export class TimeSlotsService {
       };
     }
 
+    // Lấy tất cả mẫu khung giờ có sẵn
     const timeSlotTemplates = await this.timeSlotTemplateRepository.find({
       where: {
         isActive: true,
@@ -111,6 +116,7 @@ export class TimeSlotsService {
       },
     });
 
+    // Lấy các khoảng thời gian nghỉ từng phần trong ngày
     const partialTimeOffs = await this.stylistTimeOffRepository.find({
       where: {
         stylistId,
@@ -120,6 +126,7 @@ export class TimeSlotsService {
       },
     });
 
+    // Lấy các khung giờ đã được đặt
     const bookedSlots = await this.bookedTimeSlotRepository.find({
       where: {
         stylistId,
@@ -127,22 +134,38 @@ export class TimeSlotsService {
       },
     });
 
+    // Lấy giờ hiện tại để lọc các khung giờ đã qua
     const currentHour = today.getHours();
     const currentMinute = today.getMinutes();
     const currentTimeString = `${currentHour
       .toString()
       .padStart(2, '0')}:${currentMinute.toString().padStart(2, '0')}`;
 
+    // Xác định có phải là ngày hiện tại không
+    const isCurrentDay =
+      requestDate.getDate() === today.getDate() &&
+      requestDate.getMonth() === today.getMonth() &&
+      requestDate.getFullYear() === today.getFullYear();
+
+    // Lọc các khung giờ có sẵn
     const availableTimeSlots = timeSlotTemplates.filter((template) => {
-      const isInPast =
-        requestDate.getDate() === today.getDate() &&
-        requestDate.getMonth() === today.getMonth() &&
-        requestDate.getFullYear() === today.getFullYear() &&
-        template.startTime <= currentTimeString;
+      // Nếu là ngày hiện tại, chỉ hiển thị khung giờ trong tương lai
+      if (isCurrentDay) {
+        // So sánh giờ và phút để kiểm tra xem khung giờ đã qua chưa
+        const [templateHour, templateMinute] = template.startTime
+          .split(':')
+          .map(Number);
 
-      // Nếu đã qua giờ này trong ngày hiện tại, bỏ qua
-      if (isInPast) return false;
+        // Nếu giờ bắt đầu nhỏ hơn giờ hiện tại, hoặc bằng giờ hiện tại nhưng phút bắt đầu nhỏ hơn hoặc bằng phút hiện tại
+        if (
+          templateHour < currentHour ||
+          (templateHour === currentHour && templateMinute <= currentMinute)
+        ) {
+          return false; // Bỏ qua khung giờ đã qua
+        }
+      }
 
+      // Kiểm tra xem khung giờ có trùng với thời gian nghỉ không
       const isInTimeOff = partialTimeOffs.some((timeOff) => {
         return this.isTimeOverlap(
           template.startTime,
@@ -152,6 +175,7 @@ export class TimeSlotsService {
         );
       });
 
+      // Kiểm tra xem khung giờ đã được đặt chưa
       const isBooked = bookedSlots.some((slot) => {
         const appointmentDuration = slot.appointment?.durationMinutes || 60;
 
@@ -163,9 +187,11 @@ export class TimeSlotsService {
         );
       });
 
+      // Khung giờ có sẵn nếu không nằm trong thời gian nghỉ và chưa được đặt
       return !isInTimeOff && !isBooked;
     });
 
+    // Chuyển đổi sang định dạng trả về
     const formattedItems = availableTimeSlots.map((template) => ({
       id: template.id,
       startTime: template.startTime,
