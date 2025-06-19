@@ -117,6 +117,12 @@ export class ServicesController {
     return this.servicesService.getAllServices();
   }
 
+  @Get(':id')
+  @ApiOperation({ summary: 'Get service by ID' })
+  async getServiceById(@Param('id') id: string): Promise<CreateServiceDto> {
+    return this.servicesService.getServiceById(id);
+  }
+
   @Get('with-booking-count')
   async getServicesWithBookingCount(): Promise<Services> {
     return this.servicesService.getAllServices();

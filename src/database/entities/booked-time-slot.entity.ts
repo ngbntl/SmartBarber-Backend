@@ -10,7 +10,7 @@ import { UsersEntity } from './users.entity';
 import { Appointment } from './appointment.entity';
 import { TimeSlotTemplate } from './time-slot-template.entity';
 
-@Entity('BookedTimeSlots')
+@Entity('bookedtimeslots')
 export class BookedTimeSlot extends BaseTimestamp {
   @PrimaryGeneratedColumn('uuid')
   id: string;

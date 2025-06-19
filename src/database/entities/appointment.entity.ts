@@ -12,7 +12,7 @@ import { Review } from './review.entity';
 import { BaseTimestamp } from './base-timestamp';
 import { AppointmentService } from './appointment-service.entity';
 
-@Entity('Appointments')
+@Entity('appointments')
 export class Appointment extends BaseTimestamp {
   @PrimaryGeneratedColumn('uuid')
   id: string;
