@@ -31,6 +31,7 @@ import { TimeSlotsModule } from './modules/time-slots/time-slots.module';
 import { ReviewsModule } from './modules/reviews/reviews.module';
 import { HaircolorsModule } from './modules/haircolors/haircolors.module';
 import { HairstylesModule } from './modules/hairstyles/hairstyles.module';
+import { NotificationsModule } from './modules/notifications/notifications.module';
 
 @Module({
   imports: [
@@ -63,6 +64,7 @@ import { HairstylesModule } from './modules/hairstyles/hairstyles.module';
     ReviewsModule,
     HaircolorsModule,
     HairstylesModule,
+    NotificationsModule,
   ],
   controllers: [],
   providers: [JwtService],

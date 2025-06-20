@@ -12,6 +12,7 @@ import { ServicesModule } from '../services/services.module';
 import { StylistsModule } from '../stylists/stylists.module';
 import { BranchesModule } from '../branches/branches.module';
 import { TimeSlotsModule } from '../time-slots/time-slots.module';
+import { NotificationsModule } from '../notifications/notifications.module';
 
 @Module({
   imports: [
@@ -27,6 +28,7 @@ import { TimeSlotsModule } from '../time-slots/time-slots.module';
     StylistsModule,
     BranchesModule,
     TimeSlotsModule,
+    NotificationsModule,
   ],
   controllers: [AppointmentsController],
   providers: [AppointmentsService],

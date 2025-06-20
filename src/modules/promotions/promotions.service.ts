@@ -15,6 +15,8 @@ import { generateUUID } from 'src/utils/function';
 import { MessageResponse } from 'src/common/types/response';
 import { Promotions, PromotionsResponse } from './types/promotions.type';
 import { plainToInstance } from 'class-transformer';
+import { NotificationsService } from '../notifications/notifications.service';
+import { NotificationType, RoleType } from 'src/common/constants/enum';
 
 @Injectable()
 export class PromotionsService {
@@ -25,6 +27,7 @@ export class PromotionsService {
     private serviceRepository: Repository<Service>,
     @InjectRepository(UsersEntity)
     private userRepository: Repository<UsersEntity>,
+    private readonly notificationsService: NotificationsService,
   ) {}
 
   async create(
@@ -91,12 +94,53 @@ export class PromotionsService {
         await this.promotionRepository.save(promotion);
       }
 
+      // Gửi thông báo cho tất cả người dùng về khuyến mãi mới
+      await this.sendPromotionNotifications(savedPromotion);
+
       return {
         statusCode: HttpStatus.CREATED,
         message: 'Khuyến mãi đã được tạo thành công',
       };
     } catch (error) {
       throw error;
+    }
+  }
+
+  private async sendPromotionNotifications(
+    promotion: Promotion,
+  ): Promise<void> {
+    try {
+      const users = await this.userRepository.find({
+        where: { roleType: RoleType.USER },
+      });
+
+      let title = `Khuyến mãi mới: ${promotion.name}`;
+      let content = `Khuyến mãi mới đã được tạo: "${promotion.name}"`;
+
+      if (promotion.isPercentage) {
+        content += ` - Giảm ${promotion.discountPercent}%`;
+      } else {
+        content += ` - Giảm ${new Intl.NumberFormat('vi-VN', {
+          style: 'currency',
+          currency: 'VND',
+        }).format(promotion.discountAmount)}`;
+      }
+
+      if (promotion.code) {
+        content += `. Mã: ${promotion.code}`;
+      }
+
+      for (const user of users) {
+        await this.notificationsService.create({
+          userId: user.id,
+          title: title,
+          content: content,
+          type: NotificationType.PROMOTION,
+          referenceId: promotion.id,
+        });
+      }
+    } catch (error) {
+      console.error('Lỗi khi gửi thông báo khuyến mãi:', error);
     }
   }
 

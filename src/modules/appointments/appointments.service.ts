@@ -21,6 +21,8 @@ import { Appointments, AppointmentResponse } from './types/appointments.types';
 import { plainToClass, plainToInstance } from 'class-transformer';
 import { UsersService } from '../users/users.service';
 import { TimeSlotsService } from '../time-slots/time-slots.service';
+import { NotificationsService } from '../notifications/notifications.service';
+import { NotificationType } from 'src/common/constants/enum';
 
 @Injectable()
 export class AppointmentsService {
@@ -38,6 +40,7 @@ export class AppointmentsService {
     private stylistService: StylistsService,
     private servicesService: ServicesService,
     private timeSlotsService: TimeSlotsService,
+    private notificationsService: NotificationsService,
   ) {}
 
   async createAppointment(
@@ -318,6 +321,14 @@ export class AppointmentsService {
       });
 
       await this.bookedTimeSlotRepository.save(bookedTimeSlot);
+
+      // Gửi thông báo cho stylist về lịch hẹn mới
+      await this.notificationsService.sendNotification(
+        stylistId,
+        `Bạn có lịch hẹn mới vào ngày ${dateFormatted} lúc ${startTime}.`,
+        NotificationType.APPOINTMENT,
+        savedAppointment.id,
+      );
 
       return {
         statusCode: HttpStatus.OK,
