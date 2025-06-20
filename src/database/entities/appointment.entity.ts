@@ -60,7 +60,14 @@ export class Appointment extends BaseTimestamp {
   @Column({
     name: 'Status',
     type: 'enum',
-    enum: ['pending', 'confirmed', 'cancelled', 'completed', 'no-show'],
+    enum: [
+      'pending',
+      'confirmed',
+      'cancelled',
+      'completed',
+      'no-show',
+      'in-progress',
+    ],
     default: 'pending',
   })
   status: string;

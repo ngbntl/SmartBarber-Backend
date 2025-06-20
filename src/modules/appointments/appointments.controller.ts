@@ -18,6 +18,8 @@ import { RoleType } from '../../common/constants/enum';
 import { Appointments } from './types/appointments.types';
 import { MessageResponse } from 'src/common/types/response';
 import { User } from 'src/common/decorators/current-user.decorator';
+import { EmergencyCancelDto } from './dto/emergency-cancel.dto';
+import { ReassignAppointmentDto } from './dto/reassign-appointment.dto';
 
 @ApiBearerAuth()
 @ApiTags('appointments')
@@ -137,6 +139,39 @@ export class AppointmentsController {
     return this.appointmentsService.getUpcomingAppointments(
       userId,
       days ? +days : 7,
+    );
+  }
+
+  @Put('emergency-cancel/:appointmentId')
+  @JwtAuth()
+  @Roles([RoleType.STYLIST])
+  @ApiOperation({ summary: 'Stylist hủy lịch hẹn trong trường hợp khẩn cấp' })
+  emergencyCancelAppointment(
+    @Param('appointmentId') appointmentId: string,
+    @Body() emergencyCancelDto: EmergencyCancelDto,
+    @User() currentUser: any,
+  ): Promise<MessageResponse> {
+    return this.appointmentsService.emergencyCancelAppointment(
+      appointmentId,
+      currentUser?.id,
+      emergencyCancelDto.emergencyReason,
+    );
+  }
+
+  @Put('reassign/:appointmentId')
+  @JwtAuth()
+  @Roles([RoleType.STYLIST, RoleType.ADMIN])
+  @ApiOperation({ summary: 'Chuyển lịch hẹn sang stylist khác' })
+  reassignAppointment(
+    @Param('appointmentId') appointmentId: string,
+    @Body() reassignAppointmentDto: ReassignAppointmentDto,
+    @User() currentUser: any,
+  ): Promise<MessageResponse> {
+    return this.appointmentsService.reassignAppointment(
+      appointmentId,
+      currentUser?.id,
+      reassignAppointmentDto.newStylistId,
+      reassignAppointmentDto.reason,
     );
   }
 }

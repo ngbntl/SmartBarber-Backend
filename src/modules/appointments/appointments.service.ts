@@ -22,7 +22,8 @@ import { plainToClass, plainToInstance } from 'class-transformer';
 import { UsersService } from '../users/users.service';
 import { TimeSlotsService } from '../time-slots/time-slots.service';
 import { NotificationsService } from '../notifications/notifications.service';
-import { NotificationType } from 'src/common/constants/enum';
+import { NotificationType, RoleType } from 'src/common/constants/enum';
+import { AppointmentSchedulerService } from './appointment-scheduler.service';
 
 @Injectable()
 export class AppointmentsService {
@@ -41,6 +42,7 @@ export class AppointmentsService {
     private servicesService: ServicesService,
     private timeSlotsService: TimeSlotsService,
     private notificationsService: NotificationsService,
+    private appointmentSchedulerService: AppointmentSchedulerService,
   ) {}
 
   async createAppointment(
@@ -330,9 +332,134 @@ export class AppointmentsService {
         savedAppointment.id,
       );
 
+      // Lập lịch kiểm tra xác nhận sau 24 giờ
+      await this.appointmentSchedulerService.schedulePendingAppointmentCheck(
+        savedAppointment,
+      );
+
       return {
         statusCode: HttpStatus.OK,
         message: MESSAGE.CREATE_APPOINTMENT_SUCCESS,
+      };
+    } catch (error) {
+      throw error;
+    }
+  }
+
+  async confirmAppointment(
+    appointmentId: string,
+    stylistId: string,
+    stylistNote?: string,
+  ): Promise<MessageResponse> {
+    try {
+      const appointment = await this.appointmentRepository.findOne({
+        where: { id: appointmentId },
+        relations: ['branch', 'user', 'stylist'],
+      });
+
+      if (!appointment) {
+        throw new NotFoundException(MESSAGE.APPOINTMENT_NOT_FOUND);
+      }
+
+      if (appointment.stylistId !== stylistId) {
+        throw new BadRequestException(
+          'Bạn không phải là stylist được chỉ định cho lịch hẹn này',
+        );
+      }
+
+      if (appointment.status !== 'pending') {
+        throw new BadRequestException(
+          `Không thể xác nhận lịch hẹn với trạng thái hiện tại: ${appointment.status}`,
+        );
+      }
+
+      const appointmentDateTime = new Date(appointment.appointmentDate);
+      const [hours, minutes] = appointment.startTime.split(':').map(Number);
+      appointmentDateTime.setHours(hours, minutes);
+
+      const currentTime = new Date();
+      if (appointmentDateTime < currentTime) {
+        throw new BadRequestException('Không thể xác nhận lịch hẹn đã qua');
+      }
+
+      // Hủy bỏ lịch kiểm tra xác nhận vì lịch hẹn đã được xác nhận
+      await this.appointmentSchedulerService.cancelConfirmationCheck(
+        appointmentId,
+      );
+
+      appointment.status = 'confirmed';
+      if (stylistNote) {
+        appointment.notes = appointment.notes
+          ? `${appointment.notes}\n\nGhi chú của stylist: ${stylistNote}`
+          : `Ghi chú của stylist: ${stylistNote}`;
+      }
+
+      await this.appointmentRepository.save(appointment);
+
+      // Cập nhật lịch trình hẹn trong AppointmentSchedulerService
+      await this.appointmentSchedulerService.scheduleAppointment(appointment);
+
+      return {
+        statusCode: HttpStatus.OK,
+        message: 'Xác nhận lịch hẹn thành công',
+      };
+    } catch (error) {
+      throw error;
+    }
+  }
+
+  async cancelAppointment(
+    appointmentId: string,
+    userId?: string,
+  ): Promise<MessageResponse> {
+    try {
+      const appointment = await this.appointmentRepository.findOne({
+        where: { id: appointmentId },
+        relations: ['user', 'branch'],
+      });
+
+      if (!appointment) {
+        throw new NotFoundException(MESSAGE.APPOINTMENT_NOT_FOUND);
+      }
+
+      if (userId && userId !== appointment.userId) {
+        throw new BadRequestException(MESSAGE.UNAUTHORIZED_CANCEL_APPOINTMENT);
+      }
+
+      const appointmentDateTime = new Date(appointment.appointmentDate);
+      const [hours, minutes] = appointment.startTime.split(':').map(Number);
+      appointmentDateTime.setHours(hours, minutes);
+
+      const currentTime = new Date();
+      const timeUntilAppointment =
+        appointmentDateTime.getTime() - currentTime.getTime();
+      const hoursUntilAppointment = timeUntilAppointment / (1000 * 60 * 60);
+
+      if (hoursUntilAppointment < 1) {
+        throw new BadRequestException(MESSAGE.TOO_LATE_TO_CANCEL);
+      }
+
+      // Hủy lịch kiểm tra xác nhận và theo dõi (nếu có)
+      if (appointment.status === 'pending') {
+        await this.appointmentSchedulerService.cancelConfirmationCheck(
+          appointmentId,
+        );
+      } else if (appointment.status === 'confirmed') {
+        await this.appointmentSchedulerService.cancelAppointmentTracking(
+          appointmentId,
+        );
+      }
+
+      appointment.status = 'cancelled';
+      await this.appointmentRepository.save(appointment);
+
+      await this.bookedTimeSlotRepository.delete({
+        appointmentId: appointmentId,
+      });
+
+      return {
+        statusCode: HttpStatus.OK,
+        message: MESSAGE.APPOINTMENT_CANCEL_SUCCESS,
       };
     } catch (error) {
       throw error;
@@ -380,7 +507,7 @@ export class AppointmentsService {
             'service.image',
           ])
           .innerJoinAndSelect('as.service', 'service')
-          .where('as.AppointmentId IN (:...appointmentIds)', { appointmentIds })
+          .where('as.appointmentId IN (:...appointmentIds)', { appointmentIds })
           .getMany();
 
         // Gán services vào từng appointment
@@ -464,58 +591,7 @@ export class AppointmentsService {
     }
   }
 
-  async cancelAppointment(
-    appointmentId: string,
-    userId?: string,
-  ): Promise<MessageResponse> {
-    try {
-      const appointment = await this.appointmentRepository.findOne({
-        where: { id: appointmentId },
-        relations: ['user', 'branch'],
-      });
-
-      if (!appointment) {
-        throw new NotFoundException(MESSAGE.APPOINTMENT_NOT_FOUND);
-      }
-
-      if (userId && userId !== appointment.userId) {
-        throw new BadRequestException(MESSAGE.UNAUTHORIZED_CANCEL_APPOINTMENT);
-      }
-
-      const appointmentDateTime = new Date(appointment.appointmentDate);
-      const [hours, minutes] = appointment.startTime.split(':').map(Number);
-      appointmentDateTime.setHours(hours, minutes);
-
-      const currentTime = new Date();
-      const timeUntilAppointment =
-        appointmentDateTime.getTime() - currentTime.getTime();
-      const hoursUntilAppointment = timeUntilAppointment / (1000 * 60 * 60);
-
-      if (hoursUntilAppointment < 1) {
-        throw new BadRequestException(MESSAGE.TOO_LATE_TO_CANCEL);
-      }
-
-      appointment.status = 'cancelled';
-      await this.appointmentRepository.save(appointment);
-
-      await this.bookedTimeSlotRepository.delete({
-        appointmentId: appointmentId,
-      });
-
-      return {
-        statusCode: HttpStatus.OK,
-        message: MESSAGE.APPOINTMENT_CANCEL_SUCCESS,
-      };
-    } catch (error) {
-      throw error;
-    }
-  }
-
-  async confirmAppointment(
-    appointmentId: string,
-    stylistId: string,
-    stylistNote?: string,
-  ): Promise<MessageResponse> {
+  async getAppointmentById(appointmentId: string): Promise<Appointment> {
     try {
       const appointment = await this.appointmentRepository.findOne({
         where: { id: appointmentId },
@@ -526,40 +602,14 @@ export class AppointmentsService {
         throw new NotFoundException(MESSAGE.APPOINTMENT_NOT_FOUND);
       }
 
-      if (appointment.stylistId !== stylistId) {
-        throw new BadRequestException(
-          'Bạn không phải là stylist được chỉ định cho lịch hẹn này',
-        );
-      }
+      const appointmentServices = await this.appointmentServiceRepository.find({
+        where: { appointmentId },
+        relations: ['service'],
+      });
 
-      if (appointment.status !== 'pending') {
-        throw new BadRequestException(
-          `Không thể xác nhận lịch hẹn với trạng thái hiện tại: ${appointment.status}`,
-        );
-      }
+      appointment.appointmentServices = appointmentServices;
 
-      const appointmentDateTime = new Date(appointment.appointmentDate);
-      const [hours, minutes] = appointment.startTime.split(':').map(Number);
-      appointmentDateTime.setHours(hours, minutes);
-
-      const currentTime = new Date();
-      if (appointmentDateTime < currentTime) {
-        throw new BadRequestException('Không thể xác nhận lịch hẹn đã qua');
-      }
-
-      appointment.status = 'confirmed';
-      if (stylistNote) {
-        appointment.notes = appointment.notes
-          ? `${appointment.notes}\n\nGhi chú của stylist: ${stylistNote}`
-          : `Ghi chú của stylist: ${stylistNote}`;
-      }
-
-      await this.appointmentRepository.save(appointment);
-
-      return {
-        statusCode: HttpStatus.OK,
-        message: 'Xác nhận lịch hẹn thành công',
-      };
+      return appointment;
     } catch (error) {
       throw error;
     }
@@ -588,7 +638,8 @@ export class AppointmentsService {
 
       const validTransitions = {
         pending: ['confirmed', 'cancelled'],
-        confirmed: ['completed', 'cancelled', 'no-show'],
+        confirmed: ['in-progress', 'cancelled', 'no-show'],
+        'in-progress': ['completed', 'cancelled'],
         cancelled: [],
         completed: [],
         'no-show': ['confirmed'],
@@ -612,6 +663,8 @@ export class AppointmentsService {
           );
         }
       }
+
+      const oldStatus = appointment.status;
       appointment.status = status;
 
       if (note) {
@@ -631,6 +684,21 @@ export class AppointmentsService {
 
       await this.appointmentRepository.save(appointment);
 
+      // Nếu trạng thái thay đổi từ confirmed sang trạng thái khác hoặc
+      // từ trạng thái khác sang confirmed, cần cập nhật lịch trình
+      if (oldStatus === 'confirmed' && status !== 'confirmed') {
+        // Hủy lịch trình theo dõi nếu chuyển từ confirmed sang trạng thái khác
+        await this.appointmentSchedulerService.cancelAppointmentTracking(
+          appointmentId,
+        );
+      } else if (oldStatus !== 'confirmed' && status === 'confirmed') {
+        // Lên lịch theo dõi nếu chuyển từ trạng thái khác sang confirmed
+        await this.appointmentSchedulerService.scheduleAppointment(appointment);
+      } else if (status === 'confirmed') {
+        // Cập nhật lại lịch trình nếu trạng thái vẫn là confirmed
+        await this.appointmentSchedulerService.scheduleAppointment(appointment);
+      }
+
       if (status === 'cancelled') {
         await this.bookedTimeSlotRepository.delete({
           appointmentId: appointmentId,
@@ -641,30 +709,6 @@ export class AppointmentsService {
         statusCode: HttpStatus.OK,
         message: `Cập nhật trạng thái thành công`,
       };
-    } catch (error) {
-      throw error;
-    }
-  }
-
-  async getAppointmentById(appointmentId: string): Promise<Appointment> {
-    try {
-      const appointment = await this.appointmentRepository.findOne({
-        where: { id: appointmentId },
-        relations: ['branch', 'user', 'stylist'],
-      });
-
-      if (!appointment) {
-        throw new NotFoundException(MESSAGE.APPOINTMENT_NOT_FOUND);
-      }
-
-      const appointmentServices = await this.appointmentServiceRepository.find({
-        where: { appointmentId },
-        relations: ['service'],
-      });
-
-      appointment.appointmentServices = appointmentServices;
-
-      return appointment;
     } catch (error) {
       throw error;
     }
@@ -803,6 +847,276 @@ export class AppointmentsService {
         excludeExtraneousValues: true,
       });
       return { items, total };
+    } catch (error) {
+      throw error;
+    }
+  }
+
+  async emergencyCancelAppointment(
+    appointmentId: string,
+    stylistId: string,
+    emergencyReason: string,
+  ): Promise<MessageResponse> {
+    try {
+      const appointment = await this.appointmentRepository.findOne({
+        where: { id: appointmentId },
+        relations: ['user', 'stylist', 'branch'],
+      });
+
+      if (!appointment) {
+        throw new NotFoundException(MESSAGE.APPOINTMENT_NOT_FOUND);
+      }
+
+      // Verify the stylist is assigned to this appointment
+      if (appointment.stylistId !== stylistId) {
+        throw new BadRequestException(
+          'Bạn không phải là stylist được chỉ định cho lịch hẹn này',
+        );
+      }
+
+      // Check if appointment can be cancelled (only pending or confirmed)
+      if (!['pending', 'confirmed'].includes(appointment.status)) {
+        throw new BadRequestException(
+          `Không thể hủy lịch hẹn với trạng thái hiện tại: ${appointment.status}`,
+        );
+      }
+
+      // Hủy lịch kiểm tra xác nhận và theo dõi (nếu có)
+      if (appointment.status === 'pending') {
+        await this.appointmentSchedulerService.cancelConfirmationCheck(
+          appointmentId,
+        );
+      } else if (appointment.status === 'confirmed') {
+        await this.appointmentSchedulerService.cancelAppointmentTracking(
+          appointmentId,
+        );
+      }
+
+      // Update appointment status
+      appointment.status = 'cancelled';
+      appointment.notes = appointment.notes
+        ? `${appointment.notes}\n\nLý do hủy khẩn cấp: ${emergencyReason}`
+        : `Lý do hủy khẩn cấp: ${emergencyReason}`;
+
+      await this.appointmentRepository.save(appointment);
+
+      // Free up the booked time slot
+      await this.bookedTimeSlotRepository.delete({
+        appointmentId: appointmentId,
+      });
+
+      // Send notification to user
+      await this.notificationsService.sendNotification(
+        appointment.userId,
+        `Lịch hẹn của bạn vào ngày ${this.formatDate(
+          appointment.appointmentDate,
+        )} lúc ${appointment.startTime} đã bị hủy. Lý do: ${emergencyReason}`,
+        NotificationType.APPOINTMENT,
+        appointmentId,
+      );
+
+      return {
+        statusCode: HttpStatus.OK,
+        message: 'Lịch hẹn đã được hủy trong tình huống khẩn cấp',
+      };
+    } catch (error) {
+      throw error;
+    }
+  }
+
+  async reassignAppointment(
+    appointmentId: string,
+    currentStylistId: string,
+    newStylistId: string,
+    reason?: string,
+  ): Promise<MessageResponse> {
+    try {
+      const appointment = await this.appointmentRepository.findOne({
+        where: { id: appointmentId },
+        relations: ['user', 'stylist', 'branch'],
+      });
+
+      if (!appointment) {
+        throw new NotFoundException(MESSAGE.APPOINTMENT_NOT_FOUND);
+      }
+
+      // Verify current stylist is assigned to this appointment or is admin
+      const currentUser = await this.userServices.findById(currentStylistId);
+      if (
+        appointment.stylistId !== currentStylistId &&
+        currentUser?.roleType !== RoleType.ADMIN
+      ) {
+        throw new BadRequestException(
+          'Bạn không có quyền chuyển giao lịch hẹn này',
+        );
+      }
+
+      // Check if appointment can be reassigned (only pending or confirmed)
+      if (!['pending', 'confirmed'].includes(appointment.status)) {
+        throw new BadRequestException(
+          `Không thể chuyển giao lịch hẹn với trạng thái hiện tại: ${appointment.status}`,
+        );
+      }
+
+      // Check if the appointment date is in the future
+      const now = new Date();
+      const appointmentDate = new Date(appointment.appointmentDate);
+      const [hours, minutes] = appointment.startTime.split(':').map(Number);
+      appointmentDate.setHours(hours, minutes);
+
+      if (appointmentDate <= now) {
+        throw new BadRequestException('Không thể chuyển giao lịch hẹn đã qua');
+      }
+
+      // Get new stylist
+      const newStylist = await this.stylistService.findOne(newStylistId);
+      if (!newStylist) {
+        throw new NotFoundException(MESSAGE.STYLIST_NOT_FOUND);
+      }
+
+      // Check if new stylist is available at this time
+      const dateFormatted = this.formatDate(appointmentDate);
+      const existingStylistBookings = await this.bookedTimeSlotRepository.find({
+        where: {
+          stylistId: newStylistId,
+          bookingDate: appointmentDate,
+        },
+      });
+
+      const startTime = appointment.startTime;
+      const [startHour, startMinute] = startTime.split(':').map(Number);
+      const startDateTime = new Date(
+        appointmentDate.getFullYear(),
+        appointmentDate.getMonth(),
+        appointmentDate.getDate(),
+        startHour,
+        startMinute,
+      );
+
+      const endDateTime = new Date(startDateTime);
+      endDateTime.setMinutes(
+        startDateTime.getMinutes() + appointment.durationMinutes,
+      );
+
+      // Check if the stylist is available
+      const isStylistTimeSlotBooked = existingStylistBookings.some(
+        (booking) => {
+          const [bookingHour, bookingMin] = booking.startTime
+            .split(':')
+            .map(Number);
+          const bookingStart = new Date(
+            appointmentDate.getFullYear(),
+            appointmentDate.getMonth(),
+            appointmentDate.getDate(),
+            bookingHour,
+            bookingMin,
+          );
+
+          const bookingEnd = new Date(bookingStart);
+          bookingEnd.setMinutes(
+            bookingStart.getMinutes() + appointment.durationMinutes,
+          );
+
+          return startDateTime < bookingEnd && endDateTime > bookingStart;
+        },
+      );
+
+      if (isStylistTimeSlotBooked) {
+        throw new ConflictException(
+          'Stylist mới đã có lịch hẹn khác vào thời gian này',
+        );
+      }
+
+      // Check if stylist is working on that day
+      const dayNames = [
+        'Sunday',
+        'Monday',
+        'Tuesday',
+        'Wednesday',
+        'Thursday',
+        'Friday',
+        'Saturday',
+      ];
+      const dayOfWeek = dayNames[appointmentDate.getDay()];
+
+      const stylistSchedule =
+        await this.timeSlotsService.getStylistScheduleForDate(
+          newStylistId,
+          dateFormatted,
+          dayOfWeek,
+        );
+
+      if (!stylistSchedule || !stylistSchedule.isWorking) {
+        throw new BadRequestException(
+          'Stylist mới không làm việc vào ngày này',
+        );
+      }
+
+      // Check time off
+      const isTimeOff = await this.timeSlotsService.isStylistOffDuringTime(
+        newStylistId,
+        dateFormatted,
+        startTime,
+      );
+
+      if (isTimeOff) {
+        throw new BadRequestException(
+          'Stylist mới đã đăng ký nghỉ vào khung giờ này',
+        );
+      }
+
+      // Update appointment with new stylist
+      const oldStylistName = appointment.stylist
+        ? `${appointment.stylist.firstName} ${appointment.stylist.lastName}`
+        : 'Không có stylist';
+      const newStylistName = `${newStylist.firstName} ${newStylist.lastName}`;
+
+      appointment.stylistId = newStylistId;
+      appointment.notes = appointment.notes
+        ? `${
+            appointment.notes
+          }\n\nLịch hẹn đã được chuyển từ ${oldStylistName} sang ${newStylistName}${
+            reason ? `. Lý do: ${reason}` : ''
+          }`
+        : `Lịch hẹn đã được chuyển từ ${oldStylistName} sang ${newStylistName}${
+            reason ? `. Lý do: ${reason}` : ''
+          }`;
+
+      await this.appointmentRepository.save(appointment);
+
+      // Update booked time slot
+      const bookedTimeSlot = await this.bookedTimeSlotRepository.findOne({
+        where: { appointmentId },
+      });
+
+      if (bookedTimeSlot) {
+        bookedTimeSlot.stylistId = newStylistId;
+        await this.bookedTimeSlotRepository.save(bookedTimeSlot);
+      }
+
+      // Send notifications
+      await this.notificationsService.sendNotification(
+        appointment.userId,
+        `Lịch hẹn của bạn vào ngày ${dateFormatted} lúc ${startTime} đã được chuyển sang stylist ${newStylistName}${
+          reason ? `. Lý do: ${reason}` : ''
+        }`,
+        NotificationType.APPOINTMENT,
+        appointmentId,
+      );
+
+      await this.notificationsService.sendNotification(
+        newStylistId,
+        `Bạn đã được chỉ định cho lịch hẹn vào ngày ${dateFormatted} lúc ${startTime}${
+          reason ? `. Lý do: ${reason}` : ''
+        }`,
+        NotificationType.APPOINTMENT,
+        appointmentId,
+      );
+
+      return {
+        statusCode: HttpStatus.OK,
+        message: 'Chuyển giao lịch hẹn thành công',
+      };
     } catch (error) {
       throw error;
     }

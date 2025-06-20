@@ -580,4 +580,74 @@ export class TimeSlotsService {
     await this.timeSlotTemplateRepository.remove(timeSlot);
     return { message: 'Xóa khung giờ thành công' };
   }
+
+  async getStylistScheduleForDate(
+    stylistId: string,
+    date: string,
+    dayOfWeek: string,
+  ): Promise<StylistSchedule | null> {
+    try {
+      // Check if stylist has a schedule for this day of week
+      const schedule = await this.stylistScheduleRepository.findOne({
+        where: {
+          stylistId,
+          dayOfWeek,
+        },
+      });
+
+      return schedule;
+    } catch (error) {
+      throw error;
+    }
+  }
+
+  async isStylistOffDuringTime(
+    stylistId: string,
+    date: string,
+    time: string,
+  ): Promise<boolean> {
+    try {
+      // Check for full day time off
+      const fullDayOff = await this.stylistTimeOffRepository.findOne({
+        where: {
+          stylistId,
+          date,
+          startTime: null,
+          endTime: null,
+        },
+      });
+
+      if (fullDayOff) {
+        return true;
+      }
+
+      // Check for partial day time off
+      const partialTimeOffs = await this.stylistTimeOffRepository.find({
+        where: {
+          stylistId,
+          date,
+          startTime: Not(IsNull()),
+          endTime: Not(IsNull()),
+        },
+      });
+
+      // Check if the requested time overlaps with any time off periods
+      for (const timeOff of partialTimeOffs) {
+        if (
+          this.isTimeOverlap(
+            time,
+            this.calculateEndTime(time, 60),
+            timeOff.startTime,
+            timeOff.endTime,
+          )
+        ) {
+          return true;
+        }
+      }
+
+      return false;
+    } catch (error) {
+      throw error;
+    }
+  }
 }
