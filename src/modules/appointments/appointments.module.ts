@@ -14,6 +14,7 @@ import { BranchesModule } from '../branches/branches.module';
 import { TimeSlotsModule } from '../time-slots/time-slots.module';
 import { NotificationsModule } from '../notifications/notifications.module';
 import { AppointmentSchedulerService } from './appointment-scheduler.service';
+import { MailerService } from '../../helpers/mailer.helper';
 
 @Module({
   imports: [
@@ -32,7 +33,7 @@ import { AppointmentSchedulerService } from './appointment-scheduler.service';
     NotificationsModule,
   ],
   controllers: [AppointmentsController],
-  providers: [AppointmentsService, AppointmentSchedulerService],
+  providers: [AppointmentsService, AppointmentSchedulerService, MailerService],
   exports: [AppointmentsService, AppointmentSchedulerService],
 })
 export class AppointmentsModule {}

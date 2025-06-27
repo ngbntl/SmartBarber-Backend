@@ -595,6 +595,96 @@ export class StylistsService {
     }
   }
 
+  async getScheduleByDateRange(
+    stylistId: string,
+    startDate: string,
+    endDate: string,
+  ): Promise<WeeklySchedule> {
+    try {
+      // Verify that the stylist exists
+      const stylist = await this.findOne(stylistId);
+      if (!stylist) {
+        throw new NotFoundException(MESSAGE.STYLIST_NOT_FOUND);
+      }
+
+      // Validate date format
+      const parsedStartDate = new Date(startDate);
+      const parsedEndDate = new Date(endDate);
+
+      if (isNaN(parsedStartDate.getTime()) || isNaN(parsedEndDate.getTime())) {
+        throw new BadRequestException(
+          'Định dạng ngày không hợp lệ. Sử dụng định dạng YYYY-MM-DD',
+        );
+      }
+
+      // Check if the date range is valid
+      if (parsedEndDate < parsedStartDate) {
+        throw new BadRequestException(
+          'Ngày kết thúc phải lớn hơn hoặc bằng ngày bắt đầu',
+        );
+      }
+
+      // Calculate the number of days in the range
+      const diffTime = Math.abs(
+        parsedEndDate.getTime() - parsedStartDate.getTime(),
+      );
+      const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24)) + 1; // +1 to include end date
+
+      const days: DailySchedule[] = [];
+
+      // Retrieve schedule for each date in the range
+      for (let i = 0; i < diffDays; i++) {
+        const currentDate = new Date(parsedStartDate);
+        currentDate.setDate(parsedStartDate.getDate() + i);
+
+        const dateStr = currentDate.toISOString().split('T')[0];
+
+        const dayNames = [
+          'Sunday',
+          'Monday',
+          'Tuesday',
+          'Wednesday',
+          'Thursday',
+          'Friday',
+          'Saturday',
+        ];
+        const dayOfWeek = dayNames[currentDate.getDay()];
+
+        // Get stylist's normal schedule for this day of the week
+        const schedule = await this.entityManager.findOne(StylistSchedule, {
+          where: {
+            stylistId,
+            dayOfWeek,
+          },
+        });
+
+        // Check if there's any time-off record for this date
+        const timeOff = await this.entityManager.findOne(StylistTimeOff, {
+          where: {
+            stylistId,
+            date: dateStr,
+          },
+        });
+
+        // Stylist is working if it's their normal work day and they haven't requested time-off
+        const isWorking = schedule ? schedule.isWorking && !timeOff : false;
+
+        days.push({
+          date: dateStr,
+          dayOfWeek,
+          isWorking,
+        });
+      }
+
+      return {
+        stylistId,
+        days,
+      };
+    } catch (error) {
+      throw error;
+    }
+  }
+
   async update(
     id: string,
     updateStylistDto: UpdateStylistDto,

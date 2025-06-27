@@ -24,6 +24,7 @@ import { TimeSlotsService } from '../time-slots/time-slots.service';
 import { NotificationsService } from '../notifications/notifications.service';
 import { NotificationType, RoleType } from 'src/common/constants/enum';
 import { AppointmentSchedulerService } from './appointment-scheduler.service';
+import { MailerService } from '../../helpers/mailer.helper';
 
 @Injectable()
 export class AppointmentsService {
@@ -43,6 +44,7 @@ export class AppointmentsService {
     private timeSlotsService: TimeSlotsService,
     private notificationsService: NotificationsService,
     private appointmentSchedulerService: AppointmentSchedulerService,
+    private mailerService: MailerService,
   ) {}
 
   async createAppointment(
@@ -905,15 +907,60 @@ export class AppointmentsService {
         appointmentId: appointmentId,
       });
 
-      // Send notification to user
+      const formattedDate = this.formatDate(appointment.appointmentDate);
+      const messageContent = `Lịch hẹn của bạn vào ngày ${formattedDate} lúc ${appointment.startTime} đã bị hủy. Lý do: ${emergencyReason}`;
+
+      // Gửi thông báo trong ứng dụng cho người dùng
       await this.notificationsService.sendNotification(
         appointment.userId,
-        `Lịch hẹn của bạn vào ngày ${this.formatDate(
-          appointment.appointmentDate,
-        )} lúc ${appointment.startTime} đã bị hủy. Lý do: ${emergencyReason}`,
+        messageContent,
         NotificationType.APPOINTMENT,
         appointmentId,
       );
+
+      // Tìm thông tin người dùng để lấy email
+      if (appointment.user && appointment.user.email) {
+        const userName = `${appointment.user.firstName || ''} ${
+          appointment.user.lastName || ''
+        }`.trim();
+
+        // Tạo nội dung HTML cho email
+        const emailHtml = `
+          <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
+            <h2>Thông báo hủy lịch hẹn</h2>
+            <p>Xin chào ${userName},</p>
+            <p>Chúng tôi rất tiếc phải thông báo lịch hẹn của bạn đã bị hủy vì lý do khẩn cấp.</p>
+            <div style="background-color: #f8f9fa; padding: 15px; border-left: 4px solid #dc3545; margin: 15px 0;">
+              <p><strong>Chi tiết lịch hẹn:</strong></p>
+              <p>Ngày: ${formattedDate}</p>
+              <p>Giờ: ${appointment.startTime}</p>
+              <p>Chi nhánh: ${
+                appointment.branch ? appointment.branch.name : ''
+              }</p>
+              <p>Stylist: ${
+                appointment.stylist
+                  ? `${appointment.stylist.firstName} ${appointment.stylist.lastName}`
+                  : ''
+              }</p>
+              <p><strong>Lý do hủy:</strong> ${emergencyReason}</p>
+            </div>
+            <p>Chúng tôi rất xin lỗi vì sự bất tiện này và mong bạn có thể đặt lịch hẹn mới vào thời gian khác.</p>
+            <p>Nếu cần trợ giúp đặt lịch hẹn mới, vui lòng liên hệ với chúng tôi qua ứng dụng hoặc gọi điện.</p>
+            <p>Trân trọng,<br>Đội ngũ SmartBarber</p>
+          </div>
+        `;
+
+        // Gửi email cho khách hàng
+        await this.mailerService.sendMail(
+          appointment.user.email,
+          'Thông báo hủy lịch hẹn',
+          emailHtml,
+        );
+      } else {
+        console.log(
+          `Không thể gửi email thông báo hủy lịch hẹn cho người dùng ID ${appointment.userId}: Email không có sẵn`,
+        );
+      }
 
       return {
         statusCode: HttpStatus.OK,
