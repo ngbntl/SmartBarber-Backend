@@ -4,6 +4,7 @@ import { IsEnum, IsOptional, IsString } from 'class-validator';
 export enum AppointmentStatus {
   PENDING = 'pending',
   CONFIRMED = 'confirmed',
+  IN_PROGRESS = 'in-progress',
   CANCELLED = 'cancelled',
   COMPLETED = 'completed',
   NO_SHOW = 'no-show',

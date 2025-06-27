@@ -72,6 +72,22 @@ export class StylistsController {
     );
   }
 
+  @Get('schedule-range/:stylistId')
+  @ApiOperation({
+    summary: 'Lấy lịch làm việc của stylist theo khoảng thời gian',
+  })
+  getScheduleByDateRange(
+    @Param('stylistId') stylistId: string,
+    @Query('startDate') startDate: string,
+    @Query('endDate') endDate: string,
+  ) {
+    return this.stylistsService.getScheduleByDateRange(
+      stylistId,
+      startDate,
+      endDate,
+    );
+  }
+
   @Post('time-off')
   @JwtAuth()
   @ApiOperation({ summary: 'Đặt ngày nghỉ cho stylist' })
